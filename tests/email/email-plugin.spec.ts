@@ -12,10 +12,10 @@ import {
 } from "@jest/globals";
 import {
   EMAIL_SENDER_PLUGIN,
-  EmailClient,
-  EmailPluginOptions,
-  SendEmailArgs,
-  UserEmailSenderPlugin,
+  type EmailClient,
+  type EmailPluginOptions,
+  type SendEmailArgs,
+  type UserEmailSenderPlugin,
 } from "../../src/email/email.types";
 import { PassauthEmailNotVerifiedException } from "../../src/email/email.exceptions";
 import { EmailSenderPlugin } from "../../src";
