@@ -40,11 +40,11 @@ export type EmailPluginOptions = {
   senderEmail: string;
   client: EmailClient;
   emailConfig?: {
-    [TemplateTypes.CONFIRM_EMAIL]: {
+    [TemplateTypes.CONFIRM_EMAIL]?: {
       email?: OverrideEmailArgs;
       linkExpirationMs?: number;
     };
-    [TemplateTypes.RESET_PASSWORD]: {
+    [TemplateTypes.RESET_PASSWORD]?: {
       email?: OverrideEmailArgs;
       linkExpirationMs?: number;
     };

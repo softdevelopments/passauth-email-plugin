@@ -47,14 +47,14 @@ export class EmailSender {
     private authHandler: AuthHandler<UserEmailSenderPlugin>
   ) {
     const confirmationExpiration =
-      options.emailConfig?.[TemplateTypes.CONFIRM_EMAIL].linkExpirationMs;
+      options.emailConfig?.[TemplateTypes.CONFIRM_EMAIL]?.linkExpirationMs;
 
     if (confirmationExpiration) {
       this.confirmationLinkExpiration = confirmationExpiration;
     }
 
     const resetPasswordExpiration =
-      options.emailConfig?.[TemplateTypes.RESET_PASSWORD].linkExpirationMs;
+      options.emailConfig?.[TemplateTypes.RESET_PASSWORD]?.linkExpirationMs;
 
     if (resetPasswordExpiration) {
       this.resetPasswordLinkExpiration = resetPasswordExpiration;
@@ -239,7 +239,9 @@ export class EmailSender {
       return false;
     }
 
-    if (Date.now() > record.exp) {
+    const now = Date.now();
+
+    if (now > record.exp) {
       this.resetPasswordTokens.delete(email);
 
       return false;

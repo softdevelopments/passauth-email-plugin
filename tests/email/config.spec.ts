@@ -1,4 +1,12 @@
-import { describe, it, test, expect, beforeEach, jest } from "@jest/globals";
+import {
+  describe,
+  it,
+  test,
+  expect,
+  beforeEach,
+  jest,
+  beforeAll,
+} from "@jest/globals";
 import type {
   AuthRepo,
   PassauthConfiguration,
@@ -156,13 +164,6 @@ describe("Email Plugin:Options:Templates", () => {
     ],
   };
 
-  const userData = {
-    id: 1,
-    email: "user@email.com",
-    password: "password123",
-    emailVerified: false,
-  };
-
   beforeEach(() => {
     jest.restoreAllMocks();
     jest.clearAllTimers();
@@ -218,4 +219,161 @@ describe("Email Plugin:Options:Templates", () => {
   });
 });
 
-describe("Email Plugin:Options:emailConfig", () => {});
+describe("Email Plugin:Options:emailConfig override", () => {
+  const repoMock: AuthRepo<UserEmailSenderPlugin> = {
+    getUser: async (email) => null,
+    createUser: async (params) => userData,
+  };
+
+  const passauthConfig: PassauthConfiguration<UserEmailSenderPlugin> = {
+    secretKey: "secretKey",
+    repo: repoMock,
+  };
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllTimers();
+  });
+
+  test("Confirm Email - should override email params", async () => {
+    const passauth = Passauth({
+      ...passauthConfig,
+      plugins: [
+        EmailSenderPlugin({
+          ...emailPluginConfig,
+          emailConfig: {
+            [TemplateTypes.CONFIRM_EMAIL]: {
+              email: {
+                from: "overridden@mysite.com",
+                senderName: "Overridden Name",
+                subject: "Overridden Subject - Confirm Email",
+              },
+              linkExpirationMs: 1000 * 60 * 15,
+            },
+          },
+        }),
+      ],
+    });
+    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+
+    const emailSpy = jest.spyOn(emailClient, "send");
+    await sut.register(userData);
+
+    expect(emailSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: [userData.email],
+        senderName: "Overridden Name",
+        from: "overridden@mysite.com",
+        subject: "Overridden Subject - Confirm Email",
+        text: expect.any(String),
+        html: expect.any(String),
+      })
+    );
+  });
+
+  test("Confirm Email - should allow overriding the link expiration time", async () => {
+    const passauth = Passauth({
+      ...passauthConfig,
+      plugins: [
+        EmailSenderPlugin({
+          ...emailPluginConfig,
+          emailConfig: {
+            [TemplateTypes.CONFIRM_EMAIL]: {
+              linkExpirationMs: 1000 * 60 * 15,
+            },
+          },
+        }),
+      ],
+    });
+    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+
+    const createConfirmEmailLinkSpy = jest.spyOn(
+      emailPluginConfig.services,
+      "createConfirmEmailLink"
+    );
+    await sut.register(userData);
+
+    const token = createConfirmEmailLinkSpy.mock.calls[0][1];
+
+    jest.advanceTimersByTime(1000 * 60 * 17);
+
+    const isValid = await sut.confirmEmail(userData.email, token);
+
+    expect(isValid).toEqual({ success: false });
+  });
+
+  test("Reset Password - should override email params", async () => {
+    const passauth = Passauth({
+      ...passauthConfig,
+      plugins: [
+        EmailSenderPlugin({
+          ...emailPluginConfig,
+          emailConfig: {
+            [TemplateTypes.RESET_PASSWORD]: {
+              email: {
+                from: "overridden-reset@mysite.com",
+                senderName: "Overridden Name - Reset",
+                subject: "Overridden Subject - Reset Password",
+              },
+              linkExpirationMs: 1000 * 60 * 15,
+            },
+          },
+        }),
+      ],
+    });
+    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+
+    const emailSpy = jest.spyOn(emailClient, "send");
+    await sut.sendResetPasswordEmail(userData.email);
+
+    expect(emailSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: [userData.email],
+        senderName: "Overridden Name - Reset",
+        from: "overridden-reset@mysite.com",
+        subject: "Overridden Subject - Reset Password",
+        text: expect.any(String),
+        html: expect.any(String),
+      })
+    );
+  });
+
+  test("Reset Password - should allow overriding the link expiration time", async () => {
+    const passauth = Passauth({
+      ...passauthConfig,
+      plugins: [
+        EmailSenderPlugin({
+          ...emailPluginConfig,
+          emailConfig: {
+            [TemplateTypes.RESET_PASSWORD]: {
+              linkExpirationMs: 1000 * 60 * 15,
+            },
+          },
+        }),
+      ],
+    });
+    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+
+    const createResetPasswordLinkSpy = jest.spyOn(
+      emailPluginConfig.services,
+      "createResetPasswordLink"
+    );
+    await sut.sendResetPasswordEmail(userData.email);
+
+    const token = createResetPasswordLinkSpy.mock.calls[0][1];
+
+    jest.advanceTimersByTime(1000 * 60 * 17);
+
+    const isValid = await sut.confirmResetPassword(
+      userData.email,
+      token,
+      "new-password"
+    );
+
+    expect(isValid).toEqual({ success: false });
+  });
+});
