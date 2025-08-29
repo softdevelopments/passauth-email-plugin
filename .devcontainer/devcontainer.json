@@ -1,15 +1,14 @@
-// See https://containers.dev/implementors/json_reference/ for configuration reference
 {
-	"name": "Untitled Node.js project",
+	"name": "Passauth - EmailSender Plugin",
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
-"remoteUser": "node",
-"customizations": {
-	"vscode": {
-		"extensions": [
-			"esbenp.prettier-vscode"
-		]
+	"remoteUser": "node",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"esbenp.prettier-vscode"
+			]
+		}
 	}
-}
 }

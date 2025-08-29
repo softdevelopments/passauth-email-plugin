@@ -189,16 +189,28 @@ export class EmailSender {
   }
 
   private getResetPasswordTemplate(args: TemplateArgs) {
+    const DEFAULT_TEXT = `Reset your password for email ${args.email} by clicking on the following link: ${args.link}`;
+    const DEFAULT_HTML = `<p>Reset your password for email ${args.email} by clicking on the following link: <a href="${args.link}">Reset password</a></p>`;
+
+    const customTemplates =
+      this.options.templates?.[TemplateTypes.RESET_PASSWORD]?.(args);
+
     return {
-      text: `Reset your password for email ${args.email} by clicking on the following link: ${args.link}`,
-      html: `<p>Reset your password for email ${args.email} by clicking on the following link: <a href="${args.link}">Reset password</a></p>`,
+      text: customTemplates?.text || DEFAULT_TEXT,
+      html: customTemplates?.html || DEFAULT_HTML,
     };
   }
 
   private getConfirmEmailTemplate(args: TemplateArgs) {
+    const DEFAULT_TEXT = `Confirm your email ${args.email} by clicking on the following link: ${args.link}`;
+    const DEFAULT_HTML = `<p>Confirm your email ${args.email} by clicking on the following link: <a href="${args.link}">Confirm email</a></p>`;
+
+    const customTemplates =
+      this.options.templates?.[TemplateTypes.CONFIRM_EMAIL]?.(args);
+
     return {
-      text: `Confirm your email ${args.email} by clicking on the following link: ${args.link}`,
-      html: `<p>Confirm your email ${args.email} by clicking on the following link: <a href="${args.link}">Confirm email</a></p>`,
+      text: customTemplates?.text || DEFAULT_TEXT,
+      html: customTemplates?.html || DEFAULT_HTML,
     };
   }
 

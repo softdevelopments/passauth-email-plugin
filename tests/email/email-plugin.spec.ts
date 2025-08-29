@@ -12,6 +12,7 @@ import {
 } from "@jest/globals";
 import {
   EMAIL_SENDER_PLUGIN,
+  TemplateTypes,
   type EmailClient,
   type EmailPluginOptions,
   type SendEmailArgs,
@@ -36,7 +37,7 @@ const repoMock: AuthRepo<UserEmailSenderPlugin> = {
   createUser: async (params) => userData,
 };
 
-describe("Email Plugin:Login - Configuration: email provider and email confirmation", () => {
+describe("Email Plugin:Login", () => {
   class MockEmailClient implements EmailClient {
     async send(emailData: SendEmailArgs) {}
   }
@@ -292,7 +293,7 @@ describe("Email Plugin:Login - Configuration: email provider and email confirmat
   });
 });
 
-describe("Email Plugin:Register -  Configuration: email provider and email confirmation", () => {
+describe("Email Plugin:Register", () => {
   class MockEmailClient implements EmailClient {
     async send(emailData: SendEmailArgs) {}
   }
@@ -327,6 +328,11 @@ describe("Email Plugin:Register -  Configuration: email provider and email confi
     password: "password123",
     emailVerified: false,
   };
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllTimers();
+  });
 
   test("register - Returns emailSent: false when the email fails to send", async () => {
     const passauth = Passauth(passauthConfig);
@@ -377,6 +383,107 @@ describe("Email Plugin:Register -  Configuration: email provider and email confi
     );
     expect(emailSenderSpy.mock.calls[0][0].html).toMatch(
       /<a href="http:\/\/mysite\.com\/confirm-email\?token=\w+\">Confirm email\<\/a>/
+    );
+  });
+});
+
+describe("Email Plugin:Templates", () => {
+  class MockEmailClient implements EmailClient {
+    async send(emailData: SendEmailArgs) {}
+  }
+
+  const emailClient = new MockEmailClient();
+
+  const emailPluginConfig: EmailPluginOptions = {
+    senderName: "Sender Name",
+    senderEmail: "sender@example.com",
+    client: emailClient,
+    services: {
+      createResetPasswordLink: async (email: string, token: string) =>
+        `http://mysite.com/reset-password?token=${token}`,
+      createConfirmEmailLink: async (email: string, token: string) =>
+        `http://mysite.com/confirm-email?token=${token}`,
+    },
+    repo: {
+      confirmEmail: async (email: string) => true,
+      resetPassword: async (email: string, password: string) => true,
+    },
+    templates: {
+      [TemplateTypes.CONFIRM_EMAIL]: (params) => ({
+        text: `This is the confirm email template for email: ${params.email}, link: ${params.link}`,
+        html: `This is the confirm email template for email: ${params.email}, <a href="${params.link}">link</a>`,
+      }),
+      [TemplateTypes.RESET_PASSWORD]: (params) => ({
+        text: `This is the reset password template for email: ${params.email}, link: ${params.link}`,
+        html: `This is the reset password template for email: ${params.email}, <a href="${params.link}">link</a>`,
+      }),
+    },
+  };
+
+  const passauthConfig: PassauthConfiguration<UserEmailSenderPlugin> = {
+    secretKey: "secretKey",
+    repo: repoMock,
+    plugins: [EmailSenderPlugin(emailPluginConfig)],
+  };
+
+  const userData = {
+    id: 1,
+    email: "user@email.com",
+    password: "password123",
+    emailVerified: false,
+  };
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllTimers();
+  });
+
+  test("should render email confirm email template correctly", async () => {
+    const passauth = Passauth(passauthConfig);
+    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+
+    const emailSpy = jest.spyOn(emailClient, "send");
+    jest
+      .spyOn(repoMock, "getUser")
+      .mockReturnValueOnce(new Promise((resolve) => resolve(null)));
+    await sut.register({ email: userData.email, password: userData.password });
+
+    expect(emailSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: [userData.email],
+        subject: "Confirm your email",
+        text: expect.any(String),
+        html: expect.any(String),
+      })
+    );
+    expect(emailSpy.mock.calls[0][0].text).toMatch(
+      /This is the confirm email template for email: \w+@email.com, link: http:\/\/mysite.com\/confirm-email\?token=\w+/
+    );
+    expect(emailSpy.mock.calls[0][0].html).toMatch(
+      /This is the confirm email template for email: \w+@email.com, <a href="http:\/\/mysite.com\/confirm-email\?token=\w+">link<\/a>/
+    );
+  });
+
+  test("should render email confirm reset password template correctly", async () => {
+    const passauth = Passauth(passauthConfig);
+    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+
+    const emailSpy = jest.spyOn(emailClient, "send");
+    await sut.sendResetPasswordEmail(userData.email);
+
+    expect(emailSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: [userData.email],
+        subject: "Reset Password",
+        text: expect.any(String),
+        html: expect.any(String),
+      })
+    );
+    expect(emailSpy.mock.calls[0][0].text).toMatch(
+      /This is the reset password template for email: \w+@email.com, link: http:\/\/mysite.com\/reset-password\?token=\w+/
+    );
+    expect(emailSpy.mock.calls[0][0].html).toMatch(
+      /This is the reset password template for email: \w+@email.com, <a href="http:\/\/mysite.com\/reset-password\?token=\w+">link<\/a>/
     );
   });
 });
