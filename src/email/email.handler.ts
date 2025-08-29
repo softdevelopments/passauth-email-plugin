@@ -69,6 +69,55 @@ export class EmailSender {
     return { user: createdUser, emailSent: success };
   }
 
+  async sendConfirmPasswordEmail(email: string) {
+    try {
+      const { createConfirmEmailLink } = this.options.services;
+
+      const token = this.generateConfirmPasswordToken(email);
+
+      const link = await createConfirmEmailLink(email, token);
+      const { text, html } = this.getConfirmEmailTemplate({ email, link });
+
+      const params = this.getEmailParams(
+        {
+          to: [email],
+          subject: "Confirm your email",
+          text,
+          html,
+        },
+        TemplateTypes.CONFIRM_EMAIL
+      );
+
+      await this.options.client.send(params);
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error };
+    }
+  }
+
+  async confirmEmail(email: string, token: string) {
+    try {
+      const isValid = this.verifyToken(
+        email,
+        token,
+        TemplateTypes.CONFIRM_EMAIL
+      );
+
+      if (isValid) {
+        this.confirmEmailTokens.delete(email);
+
+        await this.options.repo.confirmEmail(email);
+
+        return { success: true };
+      }
+
+      return { success: false };
+    } catch (error) {
+      return { success: false, error };
+    }
+  }
+
   async sendResetPasswordEmail(email: string) {
     try {
       const { createResetPasswordLink } = this.options.services;
@@ -95,36 +144,26 @@ export class EmailSender {
     }
   }
 
-  async confirmEmail(email: string, token: string) {
-    const isValid = this.verifyToken(email, token, TemplateTypes.CONFIRM_EMAIL);
-
-    if (isValid) {
-      this.confirmEmailTokens.delete(email);
-
-      await this.options.repo.confirmEmail(email);
-
-      return true;
-    }
-
-    return false;
-  }
-
   async confirmResetPassword(email: string, token: string, password: string) {
-    const isValid = this.verifyToken(
-      email,
-      token,
-      TemplateTypes.RESET_PASSWORD
-    );
+    try {
+      const isValid = this.verifyToken(
+        email,
+        token,
+        TemplateTypes.RESET_PASSWORD
+      );
 
-    if (isValid) {
-      this.resetPasswordTokens.delete(email);
+      if (isValid) {
+        this.resetPasswordTokens.delete(email);
 
-      await this.options.repo.resetPassword(email, password);
+        await this.options.repo.resetPassword(email, password);
 
-      return true;
+        return { success: true };
+      }
+
+      return { success: false };
+    } catch (error) {
+      return { success: false, error };
     }
-
-    return false;
   }
 
   async login(params: LoginParams) {
@@ -220,33 +259,6 @@ export class EmailSender {
     this.confirmEmailTokens.set(email, { token, exp });
 
     return token;
-  }
-
-  async sendConfirmPasswordEmail(email: string) {
-    try {
-      const { createConfirmEmailLink } = this.options.services;
-
-      const token = this.generateConfirmPasswordToken(email);
-
-      const link = await createConfirmEmailLink(email, token);
-      const { text, html } = this.getConfirmEmailTemplate({ email, link });
-
-      const params = this.getEmailParams(
-        {
-          to: [email],
-          subject: "Confirm your email",
-          text,
-          html,
-        },
-        TemplateTypes.CONFIRM_EMAIL
-      );
-
-      await this.options.client.send(params);
-
-      return { success: true };
-    } catch (error) {
-      return { success: false };
-    }
   }
 }
 

@@ -74,7 +74,7 @@ describe("Email Plugin:Login - Configuration: email provider and email confirmat
     jest.clearAllTimers();
   });
 
-  test("Login - User should not authenticate if email is not confirmed", async () => {
+  test("login - User should not authenticate if email is not confirmed", async () => {
     const passauth = Passauth(passauthConfig);
     const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
     jest.spyOn(repoMock, "getUser").mockReturnValueOnce(
@@ -95,7 +95,7 @@ describe("Email Plugin:Login - Configuration: email provider and email confirmat
     ).rejects.toThrow(PassauthEmailNotVerifiedException);
   });
 
-  test("Login - User should authenticate if email is confirmed", async () => {
+  test("login - User should authenticate if email is confirmed", async () => {
     const passauth = Passauth(passauthConfig);
     const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
 
@@ -106,9 +106,110 @@ describe("Email Plugin:Login - Configuration: email provider and email confirmat
 
     expect(tokens).toHaveProperty("accessToken");
     expect(tokens).toHaveProperty("refreshToken");
+
+    expect(passauth.handler.verifyAccessToken(tokens.accessToken).sub).toBe(
+      userData.id
+    );
   });
 
-  test("ResetPassword - Should pass correct params to email sender", async () => {
+  test("sendConfirmPasswordEmail - User should receive email with confirmation link", async () => {
+    const passauth = Passauth(passauthConfig);
+    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+
+    const emailSenderSpy = jest.spyOn(emailClient, "send");
+
+    const { success } = await sut.sendConfirmPasswordEmail(userData.email);
+
+    expect(emailSenderSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        senderName: emailPluginConfig.senderName,
+        from: emailPluginConfig.senderEmail,
+        to: [userData.email],
+        subject: "Confirm your email",
+        text: expect.any(String),
+        html: expect.any(String),
+      })
+    );
+
+    expect(emailSenderSpy.mock.calls[0][0].text).toContain(
+      "http://mysite.com/confirm-email?token="
+    );
+    expect(emailSenderSpy.mock.calls[0][0].html).toMatch(
+      /<a href="http:\/\/mysite\.com\/confirm-email\?token=\w+\">Confirm email\<\/a>/
+    );
+    expect(success).toBe(true);
+  });
+
+  test("sendConfirmPasswordEmail - Should return false if the email fails to send.", async () => {
+    const passauth = Passauth(passauthConfig);
+    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+
+    jest
+      .spyOn(emailClient, "send")
+      .mockReturnValueOnce(
+        new Promise((_, reject) => reject(new Error("Email send failed")))
+      );
+
+    const { success } = await sut.sendConfirmPasswordEmail(userData.email);
+
+    expect(success).toBe(false);
+  });
+
+  test("confirmEmail - Should fail if the token is invalid", async () => {
+    const passauth = Passauth(passauthConfig);
+    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+
+    const { success } = await sut.confirmEmail(userData.email, "invalid-token");
+
+    expect(success).toBe(false);
+  });
+
+  test("confirmEmail - Should call repo.confirmEmail with correct params", async () => {
+    const passauth = Passauth(passauthConfig);
+    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+
+    const confirmEmailSpy = jest.spyOn(
+      emailPluginConfig.services,
+      "createConfirmEmailLink"
+    );
+    const repoConfirmEmailSpy = jest.spyOn(
+      emailPluginConfig.repo,
+      "confirmEmail"
+    );
+
+    await sut.sendConfirmPasswordEmail(userData.email);
+
+    const token = confirmEmailSpy.mock.calls[0][1];
+
+    const { success } = await sut.confirmEmail(userData.email, token);
+
+    expect(success).toBe(true);
+    expect(repoConfirmEmailSpy).toHaveBeenCalledWith(userData.email);
+  });
+
+  test("confirmEmail - Should fail if the token is used more than once", async () => {
+    const passauth = Passauth(passauthConfig);
+    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+
+    const confirmEmailSpy = jest.spyOn(
+      emailPluginConfig.services,
+      "createConfirmEmailLink"
+    );
+
+    await sut.sendConfirmPasswordEmail(userData.email);
+
+    const token = confirmEmailSpy.mock.calls[0][1];
+
+    expect(await sut.confirmEmail(userData.email, token)).toEqual({
+      success: true,
+    });
+
+    expect(await sut.confirmEmail(userData.email, token)).toEqual({
+      success: false,
+    });
+  });
+
+  test("sendResetPasswordEmail - Should pass correct params to email sender", async () => {
     const passauth = Passauth(passauthConfig);
     const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
 
@@ -137,9 +238,61 @@ describe("Email Plugin:Login - Configuration: email provider and email confirmat
       /<a href="http:\/\/mysite\.com\/reset-password\?token=\w+\">Reset password\<\/a>/
     );
   });
+
+  test("confirmResetPassword - Should fail if token is invalid", async () => {
+    const passauth = Passauth(passauthConfig);
+    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+
+    expect(
+      await sut.confirmResetPassword(
+        userData.email,
+        "invalid-token",
+        "new-password"
+      )
+    ).toEqual({ success: false });
+
+    await sut.sendResetPasswordEmail(userData.email);
+
+    expect(
+      await sut.confirmResetPassword(
+        userData.email,
+        "invalid-token",
+        "new-password"
+      )
+    ).toEqual({ success: false });
+  });
+
+  test("confirmResetPassword - Should pass correct params to repo.resetPassword", async () => {
+    const passauth = Passauth(passauthConfig);
+    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+
+    const resetPasswordSpy = jest.spyOn(
+      emailPluginConfig.services,
+      "createResetPasswordLink"
+    );
+    const repoResetPasswordSpy = jest.spyOn(
+      emailPluginConfig.repo,
+      "resetPassword"
+    );
+    await sut.sendResetPasswordEmail(userData.email);
+
+    const token = resetPasswordSpy.mock.calls[0][1];
+
+    const { success } = await sut.confirmResetPassword(
+      userData.email,
+      token,
+      "new-password"
+    );
+
+    expect(repoResetPasswordSpy).toHaveBeenCalledWith(
+      userData.email,
+      "new-password"
+    );
+    expect(success).toBe(true);
+  });
 });
 
-describe("Passauth:Register -  Configuration: email provider and email confirmation", () => {
+describe("Email Plugin:Register -  Configuration: email provider and email confirmation", () => {
   class MockEmailClient implements EmailClient {
     async send(emailData: SendEmailArgs) {}
   }
@@ -175,7 +328,7 @@ describe("Passauth:Register -  Configuration: email provider and email confirmat
     emailVerified: false,
   };
 
-  test("Register - Should return emailSent equals false if email fails", async () => {
+  test("register - Returns emailSent: false when the email fails to send", async () => {
     const passauth = Passauth(passauthConfig);
     const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
 
@@ -194,7 +347,7 @@ describe("Passauth:Register -  Configuration: email provider and email confirmat
     expect(emailSent).toBe(false);
   });
 
-  test("Register - Should pass correct params to email sender", async () => {
+  test("register - User should receive confirmation email", async () => {
     const passauth = Passauth(passauthConfig);
     const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
 
