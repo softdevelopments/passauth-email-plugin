@@ -10,17 +10,17 @@ import {
   PassauthEmailPluginMissingConfigurationException,
 } from "../exceptions";
 import {
-  TemplateTypes,
   type TemplateArgs,
   type EmailPluginOptions,
   type SendEmailArgs,
   type UserEmailSenderPlugin,
-} from "../interfaces";
+} from "../interfaces/index.d";
 import {
   PassauthInvalidCredentialsException,
   PassauthInvalidUserException,
 } from "passauth/auth/exceptions";
 import { compareHash } from "passauth/auth/utils";
+import { TemplateTypes } from "../interfaces/enum";
 
 export class EmailSender {
   private resetPasswordTokens: Map<

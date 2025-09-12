@@ -15,7 +15,7 @@ import {
   type EmailPluginOptions,
   type SendEmailArgs,
   type UserEmailSenderPlugin,
-} from "../../src/interfaces";
+} from "../../src/interfaces/index.d";
 import { PassauthEmailNotVerifiedException } from "../../src/exceptions";
 import { EmailSenderPlugin } from "../../src";
 import { EmailSender } from "../../src/handlers";

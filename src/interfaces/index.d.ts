@@ -1,9 +1,5 @@
 import type { User } from "passauth/auth/interfaces";
-
-export enum TemplateTypes {
-  RESET_PASSWORD = "reset-password",
-  CONFIRM_EMAIL = "confirm-email",
-}
+import type { TemplateTypes } from "./enum";
 
 export type SendEmailArgs = {
   senderName: string;

@@ -1,6 +1,6 @@
 {
   "name": "@passauth/email-plugin",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "type": "module",
   "main": "dist/index.js",
@@ -12,21 +12,22 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
+    "./interfaces/*": "./dist/interfaces/*",
     "./interfaces": {
-      "import": "./dist/auth/auth.types.js",
-      "types": "./dist/auth/auth.types.d.ts"
+      "import": "./dist/interfaces/index.js",
+      "types": "./dist/interfaces/index.d.ts"
     },
     "./constants": {
-      "import": "./dist/auth/auth.constants.js",
-      "types": "./dist/auth/auth.constants.d.ts"
+      "import": "./dist/constants/index.js",
+      "types": "./dist/constants/index.d.ts"
     },
     "./exceptions": {
-      "import": "./dist/auth/auth.exceptions.js",
-      "types": "./dist/auth/auth.exceptions.d.ts"
+      "import": "./dist/exceptions/index.js",
+      "types": "./dist/exceptions/index.d.ts"
     },
     "./utils": {
-      "import": "./dist/auth/auth.utils.js",
-      "types": "./dist/auth/auth.utils.d.ts"
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
     }
   },
   "files": [

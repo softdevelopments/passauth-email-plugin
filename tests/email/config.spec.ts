@@ -18,13 +18,13 @@ import { EmailSenderPlugin } from "../../src";
 import { PassauthEmailPluginMissingConfigurationException } from "../../src/exceptions";
 import { EmailPlugin, EmailSender } from "../../src/handlers";
 import {
-  TemplateTypes,
   type EmailClient,
   type EmailPluginOptions,
   type SendEmailArgs,
   type UserEmailSenderPlugin,
-} from "../../src/interfaces";
+} from "../../src/interfaces/index.d";
 import { EMAIL_SENDER_PLUGIN } from "../../src/constants";
+import { TemplateTypes } from "../../src/interfaces/enum";
 
 const userData = {
   id: 1,

@@ -2,9 +2,10 @@ import { AuthHandler } from "passauth/auth";
 import { generateToken } from "../utils";
 import { DEFAULT_CONFIRMATION_LINK_EXPIRATION_MS, DEFAULT_RESET_PASSWORD_LINK_EXPIRATION_MS, } from "../constants";
 import { PassauthEmailNotVerifiedException, PassauthEmailPluginMissingConfigurationException, } from "../exceptions";
-import { TemplateTypes, } from "../interfaces";
+import {} from "../interfaces/index.d";
 import { PassauthInvalidCredentialsException, PassauthInvalidUserException, } from "passauth/auth/exceptions";
 import { compareHash } from "passauth/auth/utils";
+import { TemplateTypes } from "../interfaces/enum";
 export class EmailSender {
     constructor(options, authHandler) {
         this.options = options;
