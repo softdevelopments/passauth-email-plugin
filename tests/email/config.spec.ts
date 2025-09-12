@@ -22,7 +22,7 @@ import {
   type EmailPluginOptions,
   type SendEmailArgs,
   type UserEmailSenderPlugin,
-} from "../../src/interfaces/index.d";
+} from "../../src/interfaces/types";
 import { EMAIL_SENDER_PLUGIN } from "../../src/constants";
 import { TemplateTypes } from "../../src/interfaces/enum";
 

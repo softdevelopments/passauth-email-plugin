@@ -14,7 +14,7 @@ import {
   type EmailPluginOptions,
   type SendEmailArgs,
   type UserEmailSenderPlugin,
-} from "../interfaces/index.d";
+} from "../interfaces/types";
 import {
   PassauthInvalidCredentialsException,
   PassauthInvalidUserException,

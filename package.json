@@ -1,6 +1,6 @@
 {
   "name": "@passauth/email-plugin",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "",
   "type": "module",
   "main": "dist/index.js",
@@ -14,8 +14,8 @@
     },
     "./interfaces/*": "./dist/interfaces/*",
     "./interfaces": {
-      "import": "./dist/interfaces/index.js",
-      "types": "./dist/interfaces/index.d.ts"
+      "import": "./dist/interfaces/types.js",
+      "types": "./dist/interfaces/types.d.ts"
     },
     "./constants": {
       "import": "./dist/constants/index.js",
