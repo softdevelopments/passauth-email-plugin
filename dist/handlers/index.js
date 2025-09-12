@@ -1,11 +1,11 @@
 import { AuthHandler } from "passauth/auth";
-import { generateToken } from "../utils";
-import { DEFAULT_CONFIRMATION_LINK_EXPIRATION_MS, DEFAULT_RESET_PASSWORD_LINK_EXPIRATION_MS, } from "../constants";
-import { PassauthEmailNotVerifiedException, PassauthEmailPluginMissingConfigurationException, } from "../exceptions";
-import {} from "../interfaces/types";
+import { generateToken } from "../utils/index.js";
+import { DEFAULT_CONFIRMATION_LINK_EXPIRATION_MS, DEFAULT_RESET_PASSWORD_LINK_EXPIRATION_MS, } from "../constants/index.js";
+import { PassauthEmailNotVerifiedException, PassauthEmailPluginMissingConfigurationException, } from "../exceptions/index.js";
+import {} from "../interfaces/types.js";
 import { PassauthInvalidCredentialsException, PassauthInvalidUserException, } from "passauth/auth/exceptions";
 import { compareHash } from "passauth/auth/utils";
-import { TemplateTypes } from "../interfaces/enum";
+import { TemplateTypes } from "../interfaces/enum.js";
 export class EmailSender {
     constructor(options, authHandler) {
         this.options = options;

@@ -1,5 +1,5 @@
 import type { User } from "passauth/auth/interfaces";
-import type { TemplateTypes } from "./enum";
+import type { TemplateTypes } from "./enum.js";
 export type SendEmailArgs = {
     senderName: string;
     from: string;

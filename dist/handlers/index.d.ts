@@ -1,6 +1,6 @@
 import { AuthHandler } from "passauth/auth";
 import type { LoginParams, RegisterParams } from "passauth/auth/interfaces";
-import { type EmailPluginOptions, type UserEmailSenderPlugin } from "../interfaces/types";
+import { type EmailPluginOptions, type UserEmailSenderPlugin } from "../interfaces/types.js";
 export declare class EmailSender {
     private options;
     private authHandler;
