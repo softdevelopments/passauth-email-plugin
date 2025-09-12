@@ -2249,9 +2249,10 @@ parse-json@^5.2.0:
     json-parse-even-better-errors "^2.3.0"
     lines-and-columns "^1.1.6"
 
-"passauth@git+https://github.com/softdevelopments/passauth.git":
+passauth@^1.0.0:
   version "1.0.0"
-  resolved "git+https://github.com/softdevelopments/passauth.git#bcb42d2473b1b5812ca1e7bb1656b97efa65123e"
+  resolved "https://registry.yarnpkg.com/passauth/-/passauth-1.0.0.tgz#265ed37fc6bab08a201d6ca99668bbeee68fed51"
+  integrity sha512-E5pbjdL4a5YIIK1m8EM8baB6h/BxD+3jvYfpid5XG+KOkiXRV+acsimaWq14w9FMxz+xx3PMk27NYjgvj96kuA==
   dependencies:
     bcrypt "^6.0.0"
     jsonwebtoken "^9.0.2"
