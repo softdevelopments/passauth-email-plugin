@@ -15,16 +15,16 @@ import { Passauth } from "passauth";
 import { hash } from "passauth/auth/auth.utils.js";
 import { DEFAULT_SALTING_ROUNDS } from "passauth/auth/auth.constants.js";
 import { EmailSenderPlugin } from "../../src";
-import { PassauthEmailPluginMissingConfigurationException } from "../../src/email/email.exceptions";
-import { EmailPlugin, EmailSender } from "../../src/email/email.handler";
+import { PassauthEmailPluginMissingConfigurationException } from "../../src/exceptions";
+import { EmailPlugin, EmailSender } from "../../src/handlers";
 import {
-  EMAIL_SENDER_PLUGIN,
   TemplateTypes,
   type EmailClient,
   type EmailPluginOptions,
   type SendEmailArgs,
   type UserEmailSenderPlugin,
-} from "../../src/email/email.types";
+} from "../../src/interfaces";
+import { EMAIL_SENDER_PLUGIN } from "../../src/constants";
 
 const userData = {
   id: 1,
@@ -34,7 +34,7 @@ const userData = {
 };
 
 class MockEmailClient implements EmailClient {
-  async send(emailData: SendEmailArgs) {}
+  async send(emailData: SendEmailArgs) { }
 }
 
 const emailClient = new MockEmailClient();

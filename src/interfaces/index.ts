@@ -62,4 +62,3 @@ export type EmailPluginOptions = {
 
 export type UserEmailSenderPlugin = User & { emailVerified: boolean };
 
-export const EMAIL_SENDER_PLUGIN = "email-sender";

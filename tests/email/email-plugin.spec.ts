@@ -11,16 +11,15 @@ import {
   beforeAll,
 } from "@jest/globals";
 import {
-  EMAIL_SENDER_PLUGIN,
-  TemplateTypes,
   type EmailClient,
   type EmailPluginOptions,
   type SendEmailArgs,
   type UserEmailSenderPlugin,
-} from "../../src/email/email.types";
-import { PassauthEmailNotVerifiedException } from "../../src/email/email.exceptions";
+} from "../../src/interfaces";
+import { PassauthEmailNotVerifiedException } from "../../src/exceptions";
 import { EmailSenderPlugin } from "../../src";
-import { EmailSender } from "../../src/email/email.handler";
+import { EmailSender } from "../../src/handlers";
+import { EMAIL_SENDER_PLUGIN } from "../../src/constants";
 
 const userData = {
   id: 1,
@@ -39,7 +38,7 @@ const repoMock: AuthRepo<UserEmailSenderPlugin> = {
 
 describe("Email Plugin:Login", () => {
   class MockEmailClient implements EmailClient {
-    async send(emailData: SendEmailArgs) {}
+    async send(emailData: SendEmailArgs) { }
   }
 
   const emailClient = new MockEmailClient();
@@ -295,7 +294,7 @@ describe("Email Plugin:Login", () => {
 
 describe("Email Plugin:Register", () => {
   class MockEmailClient implements EmailClient {
-    async send(emailData: SendEmailArgs) {}
+    async send(emailData: SendEmailArgs) { }
   }
 
   const emailClient = new MockEmailClient();

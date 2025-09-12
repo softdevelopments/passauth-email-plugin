@@ -1,21 +1,21 @@
 import { AuthHandler } from "passauth/auth";
 import type { LoginParams, RegisterParams } from "passauth/auth/interfaces";
-import { generateToken } from "./emai.utils";
+import { generateToken } from "../utils";
 import {
   DEFAULT_CONFIRMATION_LINK_EXPIRATION_MS,
   DEFAULT_RESET_PASSWORD_LINK_EXPIRATION_MS,
-} from "./email.constants";
+} from "../constants";
 import {
   PassauthEmailNotVerifiedException,
   PassauthEmailPluginMissingConfigurationException,
-} from "./email.exceptions";
+} from "../exceptions";
 import {
   TemplateTypes,
   type TemplateArgs,
   type EmailPluginOptions,
   type SendEmailArgs,
   type UserEmailSenderPlugin,
-} from "./email.types";
+} from "../interfaces";
 import {
   PassauthInvalidCredentialsException,
   PassauthInvalidUserException,
@@ -254,7 +254,7 @@ export class EmailSender {
     emailArgs: Pick<SendEmailArgs, "to" | "subject" | "text" | "html">,
     templateType: TemplateTypes
   ): SendEmailArgs {
-    const overrideParams = this.options.emailConfig?.[templateType].email;
+    const overrideParams = this.options.emailConfig?.[templateType]?.email;
 
     return {
       senderName: overrideParams?.senderName || this.options.senderName,

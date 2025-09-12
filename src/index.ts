@@ -1,10 +1,7 @@
 import type { PluginInit, SharedComponents } from "passauth/plugin/interfaces";
-import {
-  EMAIL_SENDER_PLUGIN,
-  type EmailPluginOptions,
-  type UserEmailSenderPlugin,
-} from "./email/email.types";
-import { EmailPlugin } from "./email/email.handler";
+import { EMAIL_SENDER_PLUGIN } from "./constants";
+import { EmailPlugin } from "./handlers";
+import type { EmailPluginOptions, UserEmailSenderPlugin } from "./interfaces";
 
 export const EmailSenderPlugin: PluginInit<
   UserEmailSenderPlugin,
