@@ -1,5 +1,5 @@
 {
-  "name": "passauth-email-plugin",
+  "name": "@passauth/email-plugin",
   "version": "1.0.0",
   "description": "",
   "type": "module",
