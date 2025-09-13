@@ -7,13 +7,10 @@ import {
   jest,
   beforeAll,
 } from "@jest/globals";
-import type {
-  AuthRepo,
-  PassauthConfiguration,
-} from "passauth/auth/auth.types.js";
+import type { AuthRepo, PassauthConfiguration } from "passauth/auth/interfaces";
 import { Passauth } from "passauth";
-import { hash } from "passauth/auth/auth.utils.js";
-import { DEFAULT_SALTING_ROUNDS } from "passauth/auth/auth.constants.js";
+import { hash } from "passauth/auth/utils";
+import { DEFAULT_SALTING_ROUNDS } from "passauth/auth/constants";
 import { EmailSenderPlugin } from "../../src";
 import { PassauthEmailPluginMissingConfigurationException } from "../../src/exceptions";
 import { EmailPlugin, EmailSender } from "../../src/handlers";
@@ -34,7 +31,7 @@ const userData = {
 };
 
 class MockEmailClient implements EmailClient {
-  async send(emailData: SendEmailArgs) { }
+  async send(emailData: SendEmailArgs) {}
 }
 
 const emailClient = new MockEmailClient();
