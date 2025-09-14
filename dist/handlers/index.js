@@ -95,7 +95,7 @@ export class EmailSender {
         }
     }
     async login(params) {
-        const user = await this.authHandler.repo.getUser(params.email);
+        const user = await this.authHandler.repo.getUser({ email: params.email });
         if (!user) {
             throw new PassauthInvalidUserException(params.email);
         }
