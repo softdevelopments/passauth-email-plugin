@@ -2340,10 +2340,10 @@ parse-json@^5.2.0:
     json-parse-even-better-errors "^2.3.0"
     lines-and-columns "^1.1.6"
 
-passauth@^1.0.9:
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/passauth/-/passauth-1.0.9.tgz#e31c47b6db946e864442ed3a25c7362b51110419"
-  integrity sha512-K50MSFmQVJZuz2QxaPfAneTikV5YOqIiMe2UJ/dBHcxD9QctnolDnsfYy6ga6eTJ41wyqTzhVDIFRrEDEtr4SQ==
+passauth@^1.0.10:
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/passauth/-/passauth-1.0.10.tgz#7aae93d034938756c9279f4789ef5981fe653724"
+  integrity sha512-VnvY6bjRNaARUgDsXCB0HzpH6Cvt03SnMsdW1Z0sIoBQehUdBUgC7V0MdxLyLUX150BhM5Bdccn9pBaPg/aeIw==
   dependencies:
     bcrypt "^6.0.0"
     jsonwebtoken "^9.0.2"
