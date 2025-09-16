@@ -41,7 +41,7 @@ export declare class EmailSender {
         success: boolean;
         error: unknown;
     }>;
-    login(params: LoginParams): Promise<{
+    login<T extends UserEmailSenderPlugin>(params: LoginParams, jwtUserFields?: Array<keyof T>): Promise<{
         accessToken: string;
         refreshToken: string;
     }>;

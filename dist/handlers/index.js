@@ -94,8 +94,10 @@ export class EmailSender {
             return { success: false, error };
         }
     }
-    async login(params) {
-        const user = await this.authHandler.repo.getUser({ email: params.email });
+    async login(params, jwtUserFields) {
+        const user = (await this.authHandler.repo.getUser({
+            email: params.email,
+        }));
         if (!user) {
             throw new PassauthInvalidUserException(params.email);
         }
@@ -106,7 +108,13 @@ export class EmailSender {
         if (!isValidPassword) {
             throw new PassauthInvalidCredentialsException();
         }
-        const tokens = this.authHandler.generateTokens(user.id);
+        const jwtData = jwtUserFields
+            ? jwtUserFields.reduce((paramsObj, userKey) => {
+                paramsObj[userKey] = user[userKey];
+                return paramsObj;
+            }, {})
+            : undefined;
+        const tokens = this.authHandler.generateTokens(user.id, jwtData);
         return tokens;
     }
     getResetPasswordTemplate(args) {
