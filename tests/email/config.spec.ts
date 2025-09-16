@@ -80,7 +80,7 @@ describe("Email Sender Plugin - Configuration", () => {
         { ...emailPluginConfig, senderName: undefined } as any,
         Passauth(passauthConfig).handler
       )
-    ).toThrow("Passauth email plugin exception: senderName option is required");
+    ).toThrow("senderName option is required");
 
     // Option senderEmail
     expect(() =>
@@ -94,9 +94,7 @@ describe("Email Sender Plugin - Configuration", () => {
         { ...emailPluginConfig, senderEmail: undefined } as any,
         Passauth(passauthConfig).handler
       )
-    ).toThrow(
-      "Passauth email plugin exception: senderEmail option is required"
-    );
+    ).toThrow("senderEmail option is required");
 
     // Option client
     expect(() =>
@@ -110,7 +108,7 @@ describe("Email Sender Plugin - Configuration", () => {
         { ...emailPluginConfig, client: undefined } as any,
         Passauth(passauthConfig).handler
       )
-    ).toThrow("Passauth email plugin exception: client option is required");
+    ).toThrow("client option is required");
 
     // Option services
     expect(() =>
@@ -124,7 +122,7 @@ describe("Email Sender Plugin - Configuration", () => {
         { ...emailPluginConfig, services: undefined } as any,
         Passauth(passauthConfig).handler
       )
-    ).toThrow("Passauth email plugin exception: services option is required");
+    ).toThrow("services option is required");
   });
 
   it("Should init correctly if only minimun config is provided", () => {

@@ -166,8 +166,13 @@ export class EmailSender {
     }
   }
 
-  async login(params: LoginParams) {
-    const user = await this.authHandler.repo.getUser({ email: params.email });
+  async login<T extends UserEmailSenderPlugin>(
+    params: LoginParams,
+    jwtUserFields?: Array<keyof T>
+  ) {
+    const user = (await this.authHandler.repo.getUser({
+      email: params.email,
+    })) as T | undefined;
 
     if (!user) {
       throw new PassauthInvalidUserException(params.email);
@@ -183,7 +188,15 @@ export class EmailSender {
       throw new PassauthInvalidCredentialsException();
     }
 
-    const tokens = this.authHandler.generateTokens(user.id);
+    const jwtData = jwtUserFields
+      ? jwtUserFields.reduce((paramsObj, userKey) => {
+          paramsObj[userKey] = user[userKey];
+
+          return paramsObj;
+        }, {} as Partial<T>)
+      : undefined;
+
+    const tokens = this.authHandler.generateTokens(user.id, jwtData);
 
     return tokens;
   }

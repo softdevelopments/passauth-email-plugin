@@ -38,7 +38,7 @@ const repoMock: AuthRepo<UserEmailSenderPlugin> = {
 
 describe("Email Plugin:Login", () => {
   class MockEmailClient implements EmailClient {
-    async send(emailData: SendEmailArgs) { }
+    async send(emailData: SendEmailArgs) {}
   }
 
   const emailClient = new MockEmailClient();
@@ -109,6 +109,31 @@ describe("Email Plugin:Login", () => {
 
     expect(passauth.handler.verifyAccessToken(tokens.accessToken).sub).toBe(
       userData.id
+    );
+  });
+
+  test("Login - Access token should inject user data when jwtUserFields is provided", async () => {
+    const passauth = Passauth(passauthConfig);
+    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+
+    const loginResponse = await sut.login(
+      {
+        email: userData.email,
+        password: userData.password,
+      },
+      ["email"]
+    );
+
+    const decodedToken = passauth.handler.verifyAccessToken(
+      loginResponse.accessToken
+    );
+
+    expect(decodedToken).toEqual(
+      expect.objectContaining({
+        data: {
+          email: userData.email,
+        },
+      })
     );
   });
 
@@ -294,7 +319,7 @@ describe("Email Plugin:Login", () => {
 
 describe("Email Plugin:Register", () => {
   class MockEmailClient implements EmailClient {
-    async send(emailData: SendEmailArgs) { }
+    async send(emailData: SendEmailArgs) {}
   }
 
   const emailClient = new MockEmailClient();

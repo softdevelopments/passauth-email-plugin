@@ -1,9 +1,11 @@
-export class PassauthEmailPluginException extends Error {
+import { PassauthException } from "passauth";
+export class PassauthEmailPluginException extends PassauthException {
     constructor(context, name, message) {
-        super(`Passauth email plugin exception: ${message}`);
+        super(context, name, message);
         this.context = context;
         this.name = name;
         this.origin = "passauth-email-plugin";
+        this.log = `Passauth email plugin exception: ${message}`;
     }
 }
 export class PassauthEmailPluginMissingConfigurationException extends PassauthEmailPluginException {

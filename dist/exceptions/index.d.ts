@@ -1,4 +1,5 @@
-export declare class PassauthEmailPluginException extends Error {
+import { PassauthException } from "passauth";
+export declare class PassauthEmailPluginException extends PassauthException {
     context: string;
     name: string;
     origin: string;
