@@ -1,3 +1,4 @@
+/* eslint-disable no-async-promise-executor */
 import { Passauth } from "passauth";
 import { hash } from "passauth/auth/utils";
 import { DEFAULT_SALTING_ROUNDS } from "passauth/auth/constants";
@@ -29,16 +30,16 @@ const userData = {
 };
 
 const repoMock: AuthRepo<UserPluginEmailSender> = {
-  getUser: async (email) => ({
+  getUser: async (_email) => ({
     ...userData,
     password: await hash(userData.password, DEFAULT_SALTING_ROUNDS),
   }),
-  createUser: async (params) => userData,
+  createUser: async (_params) => userData,
 };
 
 describe("Email Plugin:Login", () => {
   class MockEmailClient implements EmailClient {
-    async send(emailData: SendEmailArgs) {}
+    async send(_emailData: SendEmailArgs) {}
   }
 
   const emailClient = new MockEmailClient();
@@ -54,8 +55,8 @@ describe("Email Plugin:Login", () => {
         `http://mysite.com/confirm-email?token=${token}`,
     },
     repo: {
-      confirmEmail: async (email: string) => true,
-      resetPassword: async (email: string, password: string) => true,
+      confirmEmail: async (_email: string) => true,
+      resetPassword: async (_email: string, _password: string) => true,
     },
   };
 
@@ -160,7 +161,7 @@ describe("Email Plugin:Login", () => {
       "http://mysite.com/confirm-email?token=",
     );
     expect(emailSenderSpy.mock.calls[0][0].html).toMatch(
-      /<a href="http:\/\/mysite\.com\/confirm-email\?token=\w+\">Confirm email\<\/a>/,
+      /<a href="http:\/\/mysite\.com\/confirm-email\?token=\w+">Confirm email<\/a>/,
     );
     expect(success).toBe(true);
   });
@@ -260,7 +261,7 @@ describe("Email Plugin:Login", () => {
       "http://mysite.com/reset-password?token=",
     );
     expect(emailSenderSpy.mock.calls[0][0].html).toMatch(
-      /<a href="http:\/\/mysite\.com\/reset-password\?token=\w+\">Reset password\<\/a>/,
+      /<a href="http:\/\/mysite\.com\/reset-password\?token=\w+">Reset password<\/a>/,
     );
   });
 
@@ -319,7 +320,7 @@ describe("Email Plugin:Login", () => {
 
 describe("Email Plugin:Register", () => {
   class MockEmailClient implements EmailClient {
-    async send(emailData: SendEmailArgs) {}
+    async send(_emailData: SendEmailArgs) {}
   }
 
   const emailClient = new MockEmailClient();
@@ -335,8 +336,8 @@ describe("Email Plugin:Register", () => {
         `http://mysite.com/confirm-email?token=${token}`,
     },
     repo: {
-      confirmEmail: async (email: string) => true,
-      resetPassword: async (email: string, password: string) => true,
+      confirmEmail: async (_email: string) => true,
+      resetPassword: async (_email: string, _password: string) => true,
     },
   };
 
@@ -406,7 +407,7 @@ describe("Email Plugin:Register", () => {
       "http://mysite.com/confirm-email?token=",
     );
     expect(emailSenderSpy.mock.calls[0][0].html).toMatch(
-      /<a href="http:\/\/mysite\.com\/confirm-email\?token=\w+\">Confirm email\<\/a>/,
+      /<a href="http:\/\/mysite\.com\/confirm-email\?token=\w+">Confirm email<\/a>/,
     );
   });
 });

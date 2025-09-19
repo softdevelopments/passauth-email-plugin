@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   describe,
   it,
@@ -31,7 +32,7 @@ const userData = {
 };
 
 class MockEmailClient implements EmailClient {
-  async send(emailData: SendEmailArgs) {}
+  async send(_emailData: SendEmailArgs) {}
 }
 
 const emailClient = new MockEmailClient();
@@ -47,17 +48,17 @@ const emailPluginConfig: EmailPluginOptions = {
       `http://mysite.com/confirm-email?token=${token}`,
   },
   repo: {
-    confirmEmail: async (email: string) => true,
-    resetPassword: async (email: string, password: string) => true,
+    confirmEmail: async (_email: string) => true,
+    resetPassword: async (_email: string, _password: string) => true,
   },
 };
 
 const repoMock: AuthRepo<UserPluginEmailSender> = {
-  getUser: async (email) => ({
+  getUser: async (_email) => ({
     ...userData,
     password: await hash(userData.password, DEFAULT_SALTING_ROUNDS),
   }),
-  createUser: async (params) => userData,
+  createUser: async (_params) => userData,
 };
 
 const passauthConfig: PassauthConfiguration<UserPluginEmailSender> = {
@@ -216,8 +217,8 @@ describe("Email Plugin:Options:Templates", () => {
 
 describe("Email Plugin:Options:emailConfig override", () => {
   const repoMock: AuthRepo<UserPluginEmailSender> = {
-    getUser: async (email) => null,
-    createUser: async (params) => userData,
+    getUser: async (_email) => null,
+    createUser: async (_params) => userData,
   };
 
   const passauthConfig: PassauthConfiguration<UserPluginEmailSender> = {

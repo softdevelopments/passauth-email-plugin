@@ -40,21 +40,26 @@
     "postbuild": "tsc-esm-fix",
     "dev": "tsx watch src/index.ts",
     "prepare": "tsc && tsc-esm-fix",
-    "lint": "prettier --write ."
+    "lint": "eslint --fix && prettier --write ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@eslint/js": "^9.36.0",
     "@jest/globals": "^30.0.5",
     "@types/bcrypt": "^6.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.3.0",
+    "eslint": "^9.36.0",
+    "globals": "^16.4.0",
+    "jiti": "^2.5.1",
     "prettier": "3.6.2",
     "ts-jest": "^29",
     "tsc-esm-fix": "^3.1.2",
     "tsx": "^4.20.4",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.0"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
