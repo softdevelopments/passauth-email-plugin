@@ -14,7 +14,7 @@ import {
   type EmailClient,
   type EmailPluginOptions,
   type SendEmailArgs,
-  type UserEmailSenderPlugin,
+  type UserPluginEmailSender,
 } from "../../src/interfaces/types";
 import { PassauthEmailNotVerifiedException } from "../../src/exceptions";
 import { EmailSenderPlugin } from "../../src";
@@ -28,7 +28,7 @@ const userData = {
   emailVerified: true,
 };
 
-const repoMock: AuthRepo<UserEmailSenderPlugin> = {
+const repoMock: AuthRepo<UserPluginEmailSender> = {
   getUser: async (email) => ({
     ...userData,
     password: await hash(userData.password, DEFAULT_SALTING_ROUNDS),
@@ -59,7 +59,7 @@ describe("Email Plugin:Login", () => {
     },
   };
 
-  const passauthConfig: PassauthConfiguration<UserEmailSenderPlugin> = {
+  const passauthConfig: PassauthConfiguration<UserPluginEmailSender> = {
     secretKey: "secretKey",
     repo: repoMock,
     plugins: [EmailSenderPlugin(emailPluginConfig)],
@@ -83,15 +83,15 @@ describe("Email Plugin:Login", () => {
           ...userData,
           password: await hash(userData.password, DEFAULT_SALTING_ROUNDS),
           emailVerified: false,
-        })
-      )
+        }),
+      ),
     );
 
     await expect(
       sut.login({
         email: userData.email,
         password: userData.password,
-      })
+      }),
     ).rejects.toThrow(PassauthEmailNotVerifiedException);
   });
 
@@ -108,7 +108,7 @@ describe("Email Plugin:Login", () => {
     expect(tokens).toHaveProperty("refreshToken");
 
     expect(passauth.handler.verifyAccessToken(tokens.accessToken).sub).toBe(
-      userData.id
+      userData.id,
     );
   });
 
@@ -121,11 +121,11 @@ describe("Email Plugin:Login", () => {
         email: userData.email,
         password: userData.password,
       },
-      ["email"]
+      ["email"],
     );
 
     const decodedToken = passauth.handler.verifyAccessToken(
-      loginResponse.accessToken
+      loginResponse.accessToken,
     );
 
     expect(decodedToken).toEqual(
@@ -133,7 +133,7 @@ describe("Email Plugin:Login", () => {
         data: {
           email: userData.email,
         },
-      })
+      }),
     );
   });
 
@@ -153,14 +153,14 @@ describe("Email Plugin:Login", () => {
         subject: "Confirm your email",
         text: expect.any(String),
         html: expect.any(String),
-      })
+      }),
     );
 
     expect(emailSenderSpy.mock.calls[0][0].text).toContain(
-      "http://mysite.com/confirm-email?token="
+      "http://mysite.com/confirm-email?token=",
     );
     expect(emailSenderSpy.mock.calls[0][0].html).toMatch(
-      /<a href="http:\/\/mysite\.com\/confirm-email\?token=\w+\">Confirm email\<\/a>/
+      /<a href="http:\/\/mysite\.com\/confirm-email\?token=\w+\">Confirm email\<\/a>/,
     );
     expect(success).toBe(true);
   });
@@ -172,7 +172,7 @@ describe("Email Plugin:Login", () => {
     jest
       .spyOn(emailClient, "send")
       .mockReturnValueOnce(
-        new Promise((_, reject) => reject(new Error("Email send failed")))
+        new Promise((_, reject) => reject(new Error("Email send failed"))),
       );
 
     const { success } = await sut.sendConfirmPasswordEmail(userData.email);
@@ -195,11 +195,11 @@ describe("Email Plugin:Login", () => {
 
     const confirmEmailSpy = jest.spyOn(
       emailPluginConfig.services,
-      "createConfirmEmailLink"
+      "createConfirmEmailLink",
     );
     const repoConfirmEmailSpy = jest.spyOn(
       emailPluginConfig.repo,
-      "confirmEmail"
+      "confirmEmail",
     );
 
     await sut.sendConfirmPasswordEmail(userData.email);
@@ -218,7 +218,7 @@ describe("Email Plugin:Login", () => {
 
     const confirmEmailSpy = jest.spyOn(
       emailPluginConfig.services,
-      "createConfirmEmailLink"
+      "createConfirmEmailLink",
     );
 
     await sut.sendConfirmPasswordEmail(userData.email);
@@ -253,14 +253,14 @@ describe("Email Plugin:Login", () => {
         subject: "Reset Password",
         text: expect.any(String),
         html: expect.any(String),
-      })
+      }),
     );
 
     expect(emailSenderSpy.mock.calls[0][0].text).toContain(
-      "http://mysite.com/reset-password?token="
+      "http://mysite.com/reset-password?token=",
     );
     expect(emailSenderSpy.mock.calls[0][0].html).toMatch(
-      /<a href="http:\/\/mysite\.com\/reset-password\?token=\w+\">Reset password\<\/a>/
+      /<a href="http:\/\/mysite\.com\/reset-password\?token=\w+\">Reset password\<\/a>/,
     );
   });
 
@@ -272,8 +272,8 @@ describe("Email Plugin:Login", () => {
       await sut.confirmResetPassword(
         userData.email,
         "invalid-token",
-        "new-password"
-      )
+        "new-password",
+      ),
     ).toEqual({ success: false });
 
     await sut.sendResetPasswordEmail(userData.email);
@@ -282,8 +282,8 @@ describe("Email Plugin:Login", () => {
       await sut.confirmResetPassword(
         userData.email,
         "invalid-token",
-        "new-password"
-      )
+        "new-password",
+      ),
     ).toEqual({ success: false });
   });
 
@@ -293,11 +293,11 @@ describe("Email Plugin:Login", () => {
 
     const resetPasswordSpy = jest.spyOn(
       emailPluginConfig.services,
-      "createResetPasswordLink"
+      "createResetPasswordLink",
     );
     const repoResetPasswordSpy = jest.spyOn(
       emailPluginConfig.repo,
-      "resetPassword"
+      "resetPassword",
     );
     await sut.sendResetPasswordEmail(userData.email);
 
@@ -306,12 +306,12 @@ describe("Email Plugin:Login", () => {
     const { success } = await sut.confirmResetPassword(
       userData.email,
       token,
-      "new-password"
+      "new-password",
     );
 
     expect(repoResetPasswordSpy).toHaveBeenCalledWith(
       userData.email,
-      "new-password"
+      "new-password",
     );
     expect(success).toBe(true);
   });
@@ -340,7 +340,7 @@ describe("Email Plugin:Register", () => {
     },
   };
 
-  const passauthConfig: PassauthConfiguration<UserEmailSenderPlugin> = {
+  const passauthConfig: PassauthConfiguration<UserPluginEmailSender> = {
     secretKey: "secretKey",
     repo: repoMock,
     plugins: [EmailSenderPlugin(emailPluginConfig)],
@@ -399,14 +399,14 @@ describe("Email Plugin:Register", () => {
         subject: "Confirm your email",
         text: expect.any(String),
         html: expect.any(String),
-      })
+      }),
     );
 
     expect(emailSenderSpy.mock.calls[0][0].text).toContain(
-      "http://mysite.com/confirm-email?token="
+      "http://mysite.com/confirm-email?token=",
     );
     expect(emailSenderSpy.mock.calls[0][0].html).toMatch(
-      /<a href="http:\/\/mysite\.com\/confirm-email\?token=\w+\">Confirm email\<\/a>/
+      /<a href="http:\/\/mysite\.com\/confirm-email\?token=\w+\">Confirm email\<\/a>/,
     );
   });
 });

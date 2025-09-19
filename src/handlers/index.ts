@@ -13,7 +13,7 @@ import {
   type TemplateArgs,
   type EmailPluginOptions,
   type SendEmailArgs,
-  type UserEmailSenderPlugin,
+  type UserPluginEmailSender,
 } from "../interfaces/types";
 import {
   PassauthInvalidCredentialsException,
@@ -44,7 +44,7 @@ export class EmailSender {
 
   constructor(
     private options: EmailPluginOptions,
-    private authHandler: AuthHandler<UserEmailSenderPlugin>
+    private authHandler: AuthHandler<UserPluginEmailSender>,
   ) {
     const confirmationExpiration =
       options.emailConfig?.[TemplateTypes.CONFIRM_EMAIL]?.linkExpirationMs;
@@ -85,7 +85,7 @@ export class EmailSender {
           text,
           html,
         },
-        TemplateTypes.CONFIRM_EMAIL
+        TemplateTypes.CONFIRM_EMAIL,
       );
 
       await this.options.client.send(params);
@@ -101,7 +101,7 @@ export class EmailSender {
       const isValid = this.verifyToken(
         email,
         token,
-        TemplateTypes.CONFIRM_EMAIL
+        TemplateTypes.CONFIRM_EMAIL,
       );
 
       if (isValid) {
@@ -133,7 +133,7 @@ export class EmailSender {
           text,
           html,
         },
-        TemplateTypes.RESET_PASSWORD
+        TemplateTypes.RESET_PASSWORD,
       );
 
       await this.options.client.send(params);
@@ -149,7 +149,7 @@ export class EmailSender {
       const isValid = this.verifyToken(
         email,
         token,
-        TemplateTypes.RESET_PASSWORD
+        TemplateTypes.RESET_PASSWORD,
       );
 
       if (isValid) {
@@ -166,9 +166,9 @@ export class EmailSender {
     }
   }
 
-  async login<T extends UserEmailSenderPlugin>(
+  async login<T extends UserPluginEmailSender>(
     params: LoginParams,
-    jwtUserFields?: Array<keyof T>
+    jwtUserFields?: Array<keyof T>,
   ) {
     const user = (await this.authHandler.repo.getUser({
       email: params.email,
@@ -265,7 +265,7 @@ export class EmailSender {
 
   private getEmailParams(
     emailArgs: Pick<SendEmailArgs, "to" | "subject" | "text" | "html">,
-    templateType: TemplateTypes
+    templateType: TemplateTypes,
   ): SendEmailArgs {
     const overrideParams = this.options.emailConfig?.[templateType]?.email;
 
@@ -291,7 +291,7 @@ export class EmailSender {
 
 export const EmailPlugin = (
   options: EmailPluginOptions,
-  authHandler: AuthHandler<UserEmailSenderPlugin>
+  authHandler: AuthHandler<UserPluginEmailSender>,
 ) => {
   if (!options.senderName) {
     throw new PassauthEmailPluginMissingConfigurationException("senderName");

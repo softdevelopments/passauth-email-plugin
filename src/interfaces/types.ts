@@ -56,5 +56,4 @@ export type EmailPluginOptions = {
   };
 };
 
-export type UserEmailSenderPlugin = User & { emailVerified: boolean };
-
+export type UserPluginEmailSender = User & { emailVerified: boolean };

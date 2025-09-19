@@ -1,14 +1,12 @@
 {
-	"name": "Passauth - EmailSender Plugin",
-	"build": {
-		"dockerfile": "Dockerfile"
-	},
-	"remoteUser": "node",
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"esbenp.prettier-vscode"
-			]
-		}
-	}
+  "name": "Passauth - EmailSender Plugin",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteUser": "node",
+  "customizations": {
+    "vscode": {
+      "extensions": ["esbenp.prettier-vscode"]
+    }
+  }
 }

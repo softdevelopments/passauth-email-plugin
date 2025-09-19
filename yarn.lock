@@ -2340,10 +2340,10 @@ parse-json@^5.2.0:
     json-parse-even-better-errors "^2.3.0"
     lines-and-columns "^1.1.6"
 
-passauth@^1.0.10:
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/passauth/-/passauth-1.0.10.tgz#7aae93d034938756c9279f4789ef5981fe653724"
-  integrity sha512-VnvY6bjRNaARUgDsXCB0HzpH6Cvt03SnMsdW1Z0sIoBQehUdBUgC7V0MdxLyLUX150BhM5Bdccn9pBaPg/aeIw==
+passauth@^1.0.11:
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/passauth/-/passauth-1.0.11.tgz#817b59a83f92533bfcd9fa724eb9a327d7fba4ef"
+  integrity sha512-RE2hmBVy+qjOVAQuggsFO3b8QvuSZGZZUcxJYlycKRieq8i4dJI/MoAvY4X3C+/qOgGjccEmGW1uGX7XuN3w0w==
   dependencies:
     bcrypt "^6.0.0"
     jsonwebtoken "^9.0.2"
@@ -2397,6 +2397,11 @@ pkg-dir@^4.2.0:
   integrity sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==
   dependencies:
     find-up "^4.0.0"
+
+prettier@3.6.2:
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.6.2.tgz#ccda02a1003ebbb2bfda6f83a074978f608b9393"
+  integrity sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==
 
 pretty-format@30.0.5:
   version "30.0.5"

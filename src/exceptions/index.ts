@@ -3,7 +3,11 @@ import { PassauthException } from "passauth";
 export class PassauthEmailPluginException extends PassauthException {
   public origin = "passauth-email-plugin";
 
-  constructor(public context: string, public name: string, message: string) {
+  constructor(
+    public context: string,
+    public name: string,
+    message: string,
+  ) {
     super(context, name, message);
 
     this.log = `Passauth email plugin exception: ${message}`;

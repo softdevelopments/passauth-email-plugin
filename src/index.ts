@@ -3,7 +3,7 @@ import { EMAIL_SENDER_PLUGIN } from "./constants";
 import { EmailPlugin } from "./handlers";
 import type {
   EmailPluginOptions,
-  UserEmailSenderPlugin,
+  UserPluginEmailSender,
 } from "./interfaces/types";
 
 export type * from "./interfaces/types";
@@ -12,12 +12,12 @@ export * from "./constants";
 export * from "./handlers";
 
 export const EmailSenderPlugin: PluginInit<
-  UserEmailSenderPlugin,
+  UserPluginEmailSender,
   EmailPluginOptions
 > = (options: EmailPluginOptions) => {
   return {
     name: EMAIL_SENDER_PLUGIN,
-    handlerInit: (components: SharedComponents<UserEmailSenderPlugin>) =>
+    handlerInit: (components: SharedComponents<UserPluginEmailSender>) =>
       EmailPlugin(options, components.passauthHandler),
   };
 };

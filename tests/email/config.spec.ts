@@ -18,7 +18,7 @@ import {
   type EmailClient,
   type EmailPluginOptions,
   type SendEmailArgs,
-  type UserEmailSenderPlugin,
+  type UserPluginEmailSender,
 } from "../../src/interfaces/types";
 import { EMAIL_SENDER_PLUGIN } from "../../src/constants";
 import { TemplateTypes } from "../../src/interfaces/enum";
@@ -52,7 +52,7 @@ const emailPluginConfig: EmailPluginOptions = {
   },
 };
 
-const repoMock: AuthRepo<UserEmailSenderPlugin> = {
+const repoMock: AuthRepo<UserPluginEmailSender> = {
   getUser: async (email) => ({
     ...userData,
     password: await hash(userData.password, DEFAULT_SALTING_ROUNDS),
@@ -60,7 +60,7 @@ const repoMock: AuthRepo<UserEmailSenderPlugin> = {
   createUser: async (params) => userData,
 };
 
-const passauthConfig: PassauthConfiguration<UserEmailSenderPlugin> = {
+const passauthConfig: PassauthConfiguration<UserPluginEmailSender> = {
   secretKey: "secretKey",
   repo: repoMock,
   plugins: [EmailSenderPlugin(emailPluginConfig)],
@@ -72,56 +72,56 @@ describe("Email Sender Plugin - Configuration", () => {
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, senderName: undefined } as any,
-        Passauth(passauthConfig).handler
-      )
+        Passauth(passauthConfig).handler,
+      ),
     ).toThrow(PassauthEmailPluginMissingConfigurationException);
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, senderName: undefined } as any,
-        Passauth(passauthConfig).handler
-      )
+        Passauth(passauthConfig).handler,
+      ),
     ).toThrow("senderName option is required");
 
     // Option senderEmail
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, senderEmail: undefined } as any,
-        Passauth(passauthConfig).handler
-      )
+        Passauth(passauthConfig).handler,
+      ),
     ).toThrow(PassauthEmailPluginMissingConfigurationException);
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, senderEmail: undefined } as any,
-        Passauth(passauthConfig).handler
-      )
+        Passauth(passauthConfig).handler,
+      ),
     ).toThrow("senderEmail option is required");
 
     // Option client
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, client: undefined } as any,
-        Passauth(passauthConfig).handler
-      )
+        Passauth(passauthConfig).handler,
+      ),
     ).toThrow(PassauthEmailPluginMissingConfigurationException);
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, client: undefined } as any,
-        Passauth(passauthConfig).handler
-      )
+        Passauth(passauthConfig).handler,
+      ),
     ).toThrow("client option is required");
 
     // Option services
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, services: undefined } as any,
-        Passauth(passauthConfig).handler
-      )
+        Passauth(passauthConfig).handler,
+      ),
     ).toThrow(PassauthEmailPluginMissingConfigurationException);
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, services: undefined } as any,
-        Passauth(passauthConfig).handler
-      )
+        Passauth(passauthConfig).handler,
+      ),
     ).toThrow("services option is required");
   });
 
@@ -133,13 +133,13 @@ describe("Email Sender Plugin - Configuration", () => {
       handlerInit({
         passauthHandler: Passauth(passauthConfig).handler,
         plugins: {},
-      })
+      }),
     ).toBeInstanceOf(EmailSender);
   });
 });
 
 describe("Email Plugin:Options:Templates", () => {
-  const passauthConfig: PassauthConfiguration<UserEmailSenderPlugin> = {
+  const passauthConfig: PassauthConfiguration<UserPluginEmailSender> = {
     secretKey: "secretKey",
     repo: repoMock,
     plugins: [
@@ -180,13 +180,13 @@ describe("Email Plugin:Options:Templates", () => {
         subject: "Confirm your email",
         text: expect.any(String),
         html: expect.any(String),
-      })
+      }),
     );
     expect(emailSpy.mock.calls[0][0].text).toMatch(
-      /This is the confirm email template for email: \w+@email.com, link: http:\/\/mysite.com\/confirm-email\?token=\w+/
+      /This is the confirm email template for email: \w+@email.com, link: http:\/\/mysite.com\/confirm-email\?token=\w+/,
     );
     expect(emailSpy.mock.calls[0][0].html).toMatch(
-      /This is the confirm email template for email: \w+@email.com, <a href="http:\/\/mysite.com\/confirm-email\?token=\w+">link<\/a>/
+      /This is the confirm email template for email: \w+@email.com, <a href="http:\/\/mysite.com\/confirm-email\?token=\w+">link<\/a>/,
     );
   });
 
@@ -203,24 +203,24 @@ describe("Email Plugin:Options:Templates", () => {
         subject: "Reset Password",
         text: expect.any(String),
         html: expect.any(String),
-      })
+      }),
     );
     expect(emailSpy.mock.calls[0][0].text).toMatch(
-      /This is the reset password template for email: \w+@email.com, link: http:\/\/mysite.com\/reset-password\?token=\w+/
+      /This is the reset password template for email: \w+@email.com, link: http:\/\/mysite.com\/reset-password\?token=\w+/,
     );
     expect(emailSpy.mock.calls[0][0].html).toMatch(
-      /This is the reset password template for email: \w+@email.com, <a href="http:\/\/mysite.com\/reset-password\?token=\w+">link<\/a>/
+      /This is the reset password template for email: \w+@email.com, <a href="http:\/\/mysite.com\/reset-password\?token=\w+">link<\/a>/,
     );
   });
 });
 
 describe("Email Plugin:Options:emailConfig override", () => {
-  const repoMock: AuthRepo<UserEmailSenderPlugin> = {
+  const repoMock: AuthRepo<UserPluginEmailSender> = {
     getUser: async (email) => null,
     createUser: async (params) => userData,
   };
 
-  const passauthConfig: PassauthConfiguration<UserEmailSenderPlugin> = {
+  const passauthConfig: PassauthConfiguration<UserPluginEmailSender> = {
     secretKey: "secretKey",
     repo: repoMock,
   };
@@ -266,7 +266,7 @@ describe("Email Plugin:Options:emailConfig override", () => {
         subject: "Overridden Subject - Confirm Email",
         text: expect.any(String),
         html: expect.any(String),
-      })
+      }),
     );
   });
 
@@ -288,7 +288,7 @@ describe("Email Plugin:Options:emailConfig override", () => {
 
     const createConfirmEmailLinkSpy = jest.spyOn(
       emailPluginConfig.services,
-      "createConfirmEmailLink"
+      "createConfirmEmailLink",
     );
     await sut.register(userData);
 
@@ -333,7 +333,7 @@ describe("Email Plugin:Options:emailConfig override", () => {
         subject: "Overridden Subject - Reset Password",
         text: expect.any(String),
         html: expect.any(String),
-      })
+      }),
     );
   });
 
@@ -355,7 +355,7 @@ describe("Email Plugin:Options:emailConfig override", () => {
 
     const createResetPasswordLinkSpy = jest.spyOn(
       emailPluginConfig.services,
-      "createResetPasswordLink"
+      "createResetPasswordLink",
     );
     await sut.sendResetPasswordEmail(userData.email);
 
@@ -366,7 +366,7 @@ describe("Email Plugin:Options:emailConfig override", () => {
     const isValid = await sut.confirmResetPassword(
       userData.email,
       token,
-      "new-password"
+      "new-password",
     );
 
     expect(isValid).toEqual({ success: false });
