@@ -2829,10 +2829,10 @@ parse-json@^5.2.0:
     json-parse-even-better-errors "^2.3.0"
     lines-and-columns "^1.1.6"
 
-passauth@^1.0.11:
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/passauth/-/passauth-1.0.11.tgz#817b59a83f92533bfcd9fa724eb9a327d7fba4ef"
-  integrity sha512-RE2hmBVy+qjOVAQuggsFO3b8QvuSZGZZUcxJYlycKRieq8i4dJI/MoAvY4X3C+/qOgGjccEmGW1uGX7XuN3w0w==
+passauth@^1.0.12:
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/passauth/-/passauth-1.0.12.tgz#03aa7342180d727757d1150b18d943c4ca551054"
+  integrity sha512-AKJCU/uCRseYONzluuzdSp/WqxXRpiC9+KvNQ3qrEvz90iZu0cjpja65cgpSd/NkEju+x6Ho7i6GpebEh/2Fhg==
   dependencies:
     bcrypt "^6.0.0"
     jsonwebtoken "^9.0.2"
