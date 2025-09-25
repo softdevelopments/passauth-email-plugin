@@ -5,7 +5,11 @@ import type {
   EmailPluginOptions,
   UserPluginEmailSender,
 } from "./interfaces/types";
-import { AuthHandler, type PassauthHandlerInt } from "passauth";
+import {
+  AuthHandler,
+  type PassauthHandler,
+  type PassauthHandlerInt,
+} from "passauth";
 
 export type * from "./interfaces/types";
 export * from "./interfaces/enum";
@@ -56,3 +60,6 @@ export const EmailSenderPlugin = (options: EmailPluginOptions) => {
       undefined as unknown as EmailSenderHandler,
   };
 };
+
+export type PassauthWithEmailSenderPlugin<U extends UserPluginEmailSender> =
+  Omit<PassauthHandler<U>, keyof EmailSenderHandler> & EmailSenderHandler;
