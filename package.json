@@ -38,7 +38,8 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --detectOpenHandles --forceExit",
     "build": "tsc && tsc-esm-fix",
     "dev": "tsx watch src/index.ts",
-    "lint": "eslint --fix && prettier --write ."
+    "lint": "eslint --fix && prettier --write .",
+    "prepublishOnly": "tsc && tsc-esm-fix"
   },
   "keywords": [],
   "author": "",
