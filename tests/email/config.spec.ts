@@ -88,13 +88,13 @@ describe("Email Sender Plugin - Configuration", () => {
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, senderEmail: undefined } as any,
-        Passauth(passauthConfig).handler,
+        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow(PassauthEmailPluginMissingConfigurationException);
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, senderEmail: undefined } as any,
-        Passauth(passauthConfig).handler,
+        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow("senderEmail option is required");
 
@@ -102,13 +102,13 @@ describe("Email Sender Plugin - Configuration", () => {
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, client: undefined } as any,
-        Passauth(passauthConfig).handler,
+        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow(PassauthEmailPluginMissingConfigurationException);
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, client: undefined } as any,
-        Passauth(passauthConfig).handler,
+        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow("client option is required");
 
@@ -116,13 +116,13 @@ describe("Email Sender Plugin - Configuration", () => {
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, services: undefined } as any,
-        Passauth(passauthConfig).handler,
+        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow(PassauthEmailPluginMissingConfigurationException);
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, services: undefined } as any,
-        Passauth(passauthConfig).handler,
+        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow("services option is required");
   });
