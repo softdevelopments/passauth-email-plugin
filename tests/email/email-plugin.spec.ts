@@ -17,7 +17,11 @@ import {
   type SendEmailArgs,
   type UserPluginEmailSender,
 } from "../../src/interfaces/types";
-import { PassauthEmailNotVerifiedException } from "../../src/exceptions";
+import {
+  PassauthEmailFailedToSendEmailException,
+  PassauthEmailInvalidConfirmEmailTokenException,
+  PassauthEmailNotVerifiedException,
+} from "../../src/exceptions";
 import { EmailSenderPlugin } from "../../src";
 
 const userData = {
@@ -166,7 +170,7 @@ describe("Email Plugin:Login", () => {
     expect(success).toBe(true);
   });
 
-  test("sendConfirmPasswordEmail - Should return false if the email fails to send.", async () => {
+  test("sendConfirmPasswordEmail - Should throw error if the email fails to send", async () => {
     const passauth = Passauth(passauthConfig);
     const sut = passauth.handler;
 
@@ -176,18 +180,18 @@ describe("Email Plugin:Login", () => {
         new Promise((_, reject) => reject(new Error("Email send failed"))),
       );
 
-    const { success } = await sut.sendConfirmPasswordEmail(userData.email);
-
-    expect(success).toBe(false);
+    await expect(sut.sendConfirmPasswordEmail(userData.email)).rejects.toThrow(
+      PassauthEmailFailedToSendEmailException,
+    );
   });
 
   test("confirmEmail - Should fail if the token is invalid", async () => {
     const passauth = Passauth(passauthConfig);
     const sut = passauth.handler;
 
-    const { success } = await sut.confirmEmail(userData.email, "invalid-token");
-
-    expect(success).toBe(false);
+    await expect(
+      sut.confirmEmail(userData.email, "invalid-token"),
+    ).rejects.toThrow(PassauthEmailInvalidConfirmEmailTokenException);
   });
 
   test("confirmEmail - Should call repo.confirmEmail with correct params", async () => {
@@ -207,9 +211,8 @@ describe("Email Plugin:Login", () => {
 
     const token = confirmEmailSpy.mock.calls[0][1];
 
-    const { success } = await sut.confirmEmail(userData.email, token);
+    await sut.confirmEmail(userData.email, token);
 
-    expect(success).toBe(true);
     expect(repoConfirmEmailSpy).toHaveBeenCalledWith(userData.email);
   });
 
@@ -226,13 +229,11 @@ describe("Email Plugin:Login", () => {
 
     const token = confirmEmailSpy.mock.calls[0][1];
 
-    expect(await sut.confirmEmail(userData.email, token)).toEqual({
-      success: true,
-    });
+    await sut.confirmEmail(userData.email, token);
 
-    expect(await sut.confirmEmail(userData.email, token)).toEqual({
-      success: false,
-    });
+    await expect(sut.confirmEmail(userData.email, token)).rejects.toThrow(
+      PassauthEmailInvalidConfirmEmailTokenException,
+    );
   });
 
   test("sendResetPasswordEmail - Should pass correct params to email sender", async () => {
@@ -359,7 +360,7 @@ describe("Email Plugin:Register", () => {
     jest.clearAllTimers();
   });
 
-  test("register - Returns emailSent: false when the email fails to send", async () => {
+  test("register - Returns throws error when the email fails to send", async () => {
     const passauth = Passauth(passauthConfig);
     const sut = passauth.handler;
 
@@ -370,12 +371,12 @@ describe("Email Plugin:Register", () => {
       throw new Error("Email send failed");
     });
 
-    const { emailSent } = await sut.register({
-      email: userData.email,
-      password: userData.password,
-    });
-
-    expect(emailSent).toBe(false);
+    await expect(
+      sut.register({
+        email: userData.email,
+        password: userData.password,
+      }),
+    ).rejects.toThrow(PassauthEmailFailedToSendEmailException);
   });
 
   test("register - User should receive confirmation email", async () => {

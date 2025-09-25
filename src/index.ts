@@ -5,11 +5,7 @@ import type {
   EmailPluginOptions,
   UserPluginEmailSender,
 } from "./interfaces/types";
-import {
-  AuthHandler,
-  type PassauthHandler,
-  type PassauthHandlerInt,
-} from "passauth";
+import { type PassauthHandlerInt } from "passauth";
 
 export type * from "./interfaces/types";
 export * from "./interfaces/enum";
@@ -20,46 +16,49 @@ export const EmailSenderPlugin = (options: EmailPluginOptions) => {
   return {
     name: EMAIL_SENDER_PLUGIN,
     handlerInit: (components: SharedComponents<UserPluginEmailSender>) => {
-      const pasasuthConfig = (
-        components.passauthHandler as PassauthHandlerInt<UserPluginEmailSender>
-      )._aux.config;
+      const passauthConfig = components.passauthOptions;
 
-      const passauthInstance = new AuthHandler(
-        {
-          secretKey: pasasuthConfig.SECRET_KEY,
-          saltingRounds: pasasuthConfig.SALTING_ROUNDS,
-          accessTokenExpirationMs: pasasuthConfig.ACCESS_TOKEN_EXPIRATION_MS,
-          refreshTokenExpirationMs: pasasuthConfig.REFRESH_TOKEN_EXPIRATION_MS,
-        },
-        components.passauthHandler.repo,
+      const emailSenderHandler = EmailPlugin<UserPluginEmailSender>(
+        passauthConfig,
+        passauthConfig.repo,
+        options,
       );
 
-      const emailSenderHandler = EmailPlugin(options, passauthInstance);
+      components.passauthHandler = emailSenderHandler;
 
-      const passauthHandler =
-        components.passauthHandler as unknown as EmailSenderHandler;
+      // const passauthHandler =
+      //   components.passauthHandler as unknown as EmailSenderHandler<UserPluginEmailSender>;
 
-      passauthHandler.login = (...args) => emailSenderHandler.login(...args);
+      // passauthHandler.login = (...args) => emailSenderHandler.login(...args);
 
-      passauthHandler.register = (...args) =>
-        emailSenderHandler.register(...args);
+      // passauthHandler.register = (...args) =>
+      //   emailSenderHandler.register(...args);
 
-      passauthHandler.confirmEmail = (...args) =>
-        emailSenderHandler.confirmEmail(...args);
+      // passauthHandler.confirmEmail = (...args) =>
+      //   emailSenderHandler.confirmEmail(...args);
 
-      passauthHandler.confirmResetPassword = (...args) =>
-        emailSenderHandler.confirmResetPassword(...args);
+      // passauthHandler.confirmResetPassword = (...args) =>
+      //   emailSenderHandler.confirmResetPassword(...args);
 
-      passauthHandler.sendConfirmPasswordEmail = (...args) =>
-        emailSenderHandler.sendConfirmPasswordEmail(...args);
+      // passauthHandler.sendConfirmPasswordEmail = (...args) =>
+      //   emailSenderHandler.sendConfirmPasswordEmail(...args);
 
-      passauthHandler.sendResetPasswordEmail = (...args) =>
-        emailSenderHandler.sendResetPasswordEmail(...args);
+      // passauthHandler.sendResetPasswordEmail = (...args) =>
+      //   emailSenderHandler.sendResetPasswordEmail(...args);
+
+      // passauthHandler.generateTokens =
+      //   passauthInstance.generateTokens.bind(passauthInstance);
+
+      // passauthHandler.revokeRefreshToken =
+      //   passauthInstance.revokeRefreshToken.bind(passauthInstance);
+
+      // passauthHandler.refreshToken =
+      //   passauthInstance.refreshToken.bind(passauthInstance);
+
+      // passauthHandler.verifyAccessToken =
+      //   passauthInstance.verifyAccessToken.bind(passauthInstance);
     },
     __types: (_h: PassauthHandlerInt<UserPluginEmailSender>) =>
-      undefined as unknown as EmailSenderHandler,
+      undefined as unknown as EmailSenderHandler<UserPluginEmailSender>,
   };
 };
-
-export type PassauthWithEmailSenderPlugin<U extends UserPluginEmailSender> =
-  Omit<PassauthHandler<U>, keyof EmailSenderHandler> & EmailSenderHandler;

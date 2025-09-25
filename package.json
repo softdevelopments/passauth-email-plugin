@@ -66,6 +66,6 @@
     "jsonwebtoken": "^9.0.2"
   },
   "peerDependencies": {
-    "passauth": "^1.0.19"
+    "passauth": "^1.0.23"
   }
 }

@@ -1,9 +1,13 @@
-import { type PassauthHandler } from "passauth/auth/interfaces";
 import {
   PassauthInvalidCredentialsException,
   PassauthInvalidUserException,
 } from "passauth/auth/exceptions";
-import type { LoginParams, RegisterParams } from "passauth/auth/interfaces";
+import type {
+  AuthRepo,
+  LoginParams,
+  PassauthConfiguration,
+  RegisterParams,
+} from "passauth/auth/interfaces";
 import { compareHash } from "passauth/auth/utils";
 import { generateToken } from "../utils";
 import {
@@ -11,6 +15,9 @@ import {
   DEFAULT_RESET_PASSWORD_LINK_EXPIRATION_MS,
 } from "../constants";
 import {
+  PassauthEmailExceptionContext,
+  PassauthEmailFailedToSendEmailException,
+  PassauthEmailInvalidConfirmEmailTokenException,
   PassauthEmailNotVerifiedException,
   PassauthEmailPluginMissingConfigurationException,
 } from "../exceptions";
@@ -21,8 +28,11 @@ import {
   type UserPluginEmailSender,
 } from "../interfaces/types";
 import { TemplateTypes } from "../interfaces/enum";
+import { AuthHandler } from "passauth";
 
-export class EmailSenderHandler {
+export class EmailSenderHandler<
+  U extends UserPluginEmailSender,
+> extends AuthHandler<U> {
   private resetPasswordTokens: Map<
     string,
     {
@@ -43,9 +53,11 @@ export class EmailSenderHandler {
     DEFAULT_RESET_PASSWORD_LINK_EXPIRATION_MS;
 
   constructor(
+    passauthConfig: PassauthConfiguration<UserPluginEmailSender, []>,
+    passauthRepo: AuthRepo<U>,
     private options: EmailPluginOptions,
-    private authHandler: PassauthHandler<UserPluginEmailSender>,
   ) {
+    super(passauthConfig, passauthRepo);
     const confirmationExpiration =
       options.emailConfig?.[TemplateTypes.CONFIRM_EMAIL]?.linkExpirationMs;
 
@@ -62,11 +74,18 @@ export class EmailSenderHandler {
   }
 
   async register(params: RegisterParams) {
-    const createdUser = await this.authHandler.register(params);
+    const createdUser = await super.register(params);
 
     const { success } = await this.sendConfirmPasswordEmail(createdUser.email);
 
-    return { user: createdUser, emailSent: success };
+    if (!success) {
+      throw new PassauthEmailFailedToSendEmailException(
+        PassauthEmailExceptionContext.REGISTER,
+        params.email,
+      );
+    }
+
+    return createdUser;
   }
 
   async sendConfirmPasswordEmail(email: string) {
@@ -91,31 +110,24 @@ export class EmailSenderHandler {
       await this.options.client.send(params);
 
       return { success: true };
-    } catch (error) {
-      return { success: false, error };
+    } catch (_error) {
+      throw new PassauthEmailFailedToSendEmailException(
+        PassauthEmailExceptionContext.EMAIL_CONFIRMATION,
+        email,
+      );
     }
   }
 
   async confirmEmail(email: string, token: string) {
-    try {
-      const isValid = this.verifyToken(
-        email,
-        token,
-        TemplateTypes.CONFIRM_EMAIL,
-      );
+    const isValid = this.verifyToken(email, token, TemplateTypes.CONFIRM_EMAIL);
 
-      if (isValid) {
-        this.confirmEmailTokens.delete(email);
-
-        await this.options.repo.confirmEmail(email);
-
-        return { success: true };
-      }
-
-      return { success: false };
-    } catch (error) {
-      return { success: false, error };
+    if (!isValid) {
+      throw new PassauthEmailInvalidConfirmEmailTokenException(email);
     }
+
+    this.confirmEmailTokens.delete(email);
+
+    await this.options.repo.confirmEmail(email);
   }
 
   async sendResetPasswordEmail(email: string) {
@@ -166,13 +178,10 @@ export class EmailSenderHandler {
     }
   }
 
-  async login<T extends UserPluginEmailSender>(
-    params: LoginParams,
-    jwtUserFields?: Array<keyof T>,
-  ) {
-    const user = (await this.authHandler.repo.getUser({
+  async login(params: LoginParams, jwtUserFields?: Array<keyof U>) {
+    const user = await this.repo.getUser({
       email: params.email,
-    })) as T | undefined;
+    } as U);
 
     if (!user) {
       throw new PassauthInvalidUserException(params.email);
@@ -193,10 +202,10 @@ export class EmailSenderHandler {
           paramsObj[userKey] = user[userKey];
 
           return paramsObj;
-        }, {} as Partial<T>)
+        }, {} as Partial<U>)
       : undefined;
 
-    const tokens = this.authHandler.generateTokens(user.id, jwtData);
+    const tokens = this.generateTokens(user.id, jwtData);
 
     return tokens;
   }
@@ -289,9 +298,10 @@ export class EmailSenderHandler {
   }
 }
 
-export const EmailPlugin = (
+export const EmailPlugin = <U extends UserPluginEmailSender>(
+  passauthConfig: PassauthConfiguration<U, []>,
+  repo: AuthRepo<U>,
   options: EmailPluginOptions,
-  authHandler: PassauthHandler<UserPluginEmailSender>,
 ) => {
   if (!options.senderName) {
     throw new PassauthEmailPluginMissingConfigurationException("senderName");
@@ -306,7 +316,7 @@ export const EmailPlugin = (
     throw new PassauthEmailPluginMissingConfigurationException("services");
   }
 
-  const emailSender = new EmailSenderHandler(options, authHandler);
+  const emailSender = new EmailSenderHandler(passauthConfig, repo, options);
 
   return emailSender;
 };

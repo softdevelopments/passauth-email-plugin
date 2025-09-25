@@ -13,7 +13,10 @@ import { Passauth } from "passauth";
 import { hash } from "passauth/auth/utils";
 import { DEFAULT_SALTING_ROUNDS } from "passauth/auth/constants";
 import { EmailSenderPlugin } from "../../src";
-import { PassauthEmailPluginMissingConfigurationException } from "../../src/exceptions";
+import {
+  PassauthEmailInvalidConfirmEmailTokenException,
+  PassauthEmailPluginMissingConfigurationException,
+} from "../../src/exceptions";
 import { EmailPlugin } from "../../src/handlers";
 import {
   type EmailClient,
@@ -73,56 +76,67 @@ describe("Email Sender Plugin - Configuration", () => {
     // Option senderName
     expect(() =>
       EmailPlugin(
-        { ...emailPluginConfig, senderName: undefined } as any,
-        Passauth(passauthConfig).handler as any,
+        { secretKey: passauthConfig.secretKey, repo: passauthConfig.repo },
+        repoMock,
+        {
+          ...emailPluginConfig,
+          senderName: undefined,
+        } as any,
       ),
     ).toThrow(PassauthEmailPluginMissingConfigurationException);
     expect(() =>
       EmailPlugin(
+        { secretKey: passauthConfig.secretKey, repo: passauthConfig.repo },
+        repoMock,
         { ...emailPluginConfig, senderName: undefined } as any,
-        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow("senderName option is required");
 
     // Option senderEmail
     expect(() =>
       EmailPlugin(
+        { secretKey: passauthConfig.secretKey, repo: passauthConfig.repo },
+        repoMock,
         { ...emailPluginConfig, senderEmail: undefined } as any,
-        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow(PassauthEmailPluginMissingConfigurationException);
     expect(() =>
       EmailPlugin(
+        { secretKey: passauthConfig.secretKey, repo: passauthConfig.repo },
+        repoMock,
         { ...emailPluginConfig, senderEmail: undefined } as any,
-        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow("senderEmail option is required");
 
     // Option client
     expect(() =>
       EmailPlugin(
+        { secretKey: passauthConfig.secretKey, repo: passauthConfig.repo },
+        repoMock,
         { ...emailPluginConfig, client: undefined } as any,
-        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow(PassauthEmailPluginMissingConfigurationException);
     expect(() =>
       EmailPlugin(
+        { secretKey: passauthConfig.secretKey, repo: passauthConfig.repo },
+        repoMock,
         { ...emailPluginConfig, client: undefined } as any,
-        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow("client option is required");
 
     // Option services
     expect(() =>
       EmailPlugin(
+        { secretKey: passauthConfig.secretKey, repo: passauthConfig.repo },
+        repoMock,
         { ...emailPluginConfig, services: undefined } as any,
-        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow(PassauthEmailPluginMissingConfigurationException);
     expect(() =>
       EmailPlugin(
+        { secretKey: passauthConfig.secretKey, repo: passauthConfig.repo },
+        repoMock,
         { ...emailPluginConfig, services: undefined } as any,
-        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow("services option is required");
   });
@@ -292,9 +306,9 @@ describe("Email Plugin:Options:emailConfig override", () => {
 
     jest.advanceTimersByTime(1000 * 60 * 17);
 
-    const isValid = await sut.confirmEmail(userData.email, token);
-
-    expect(isValid).toEqual({ success: false });
+    await expect(sut.confirmEmail(userData.email, token)).rejects.toThrow(
+      PassauthEmailInvalidConfirmEmailTokenException,
+    );
   });
 
   test("Reset Password - should override email params", async () => {
@@ -353,6 +367,7 @@ describe("Email Plugin:Options:emailConfig override", () => {
       emailPluginConfig.services,
       "createResetPasswordLink",
     );
+
     await sut.sendResetPasswordEmail(userData.email);
 
     const token = createResetPasswordLinkSpy.mock.calls[0][1];
