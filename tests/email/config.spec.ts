@@ -8,13 +8,13 @@ import {
   jest,
   beforeAll,
 } from "@jest/globals";
-import type { AuthRepo, PassauthConfiguration } from "passauth/auth/interfaces";
+import type { AuthRepo } from "passauth/auth/interfaces";
 import { Passauth } from "passauth";
 import { hash } from "passauth/auth/utils";
 import { DEFAULT_SALTING_ROUNDS } from "passauth/auth/constants";
 import { EmailSenderPlugin } from "../../src";
 import { PassauthEmailPluginMissingConfigurationException } from "../../src/exceptions";
-import { EmailPlugin, EmailSender } from "../../src/handlers";
+import { EmailPlugin } from "../../src/handlers";
 import {
   type EmailClient,
   type EmailPluginOptions,
@@ -29,6 +29,7 @@ const userData = {
   email: "user@email.com",
   password: "password123",
   emailVerified: true,
+  isBlocked: false,
 };
 
 class MockEmailClient implements EmailClient {
@@ -61,10 +62,10 @@ const repoMock: AuthRepo<UserPluginEmailSender> = {
   createUser: async (_params) => userData,
 };
 
-const passauthConfig: PassauthConfiguration<UserPluginEmailSender> = {
+const passauthConfig = {
   secretKey: "secretKey",
   repo: repoMock,
-  plugins: [EmailSenderPlugin(emailPluginConfig)],
+  plugins: [EmailSenderPlugin(emailPluginConfig)] as const,
 };
 
 describe("Email Sender Plugin - Configuration", () => {
@@ -73,13 +74,13 @@ describe("Email Sender Plugin - Configuration", () => {
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, senderName: undefined } as any,
-        Passauth(passauthConfig).handler,
+        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow(PassauthEmailPluginMissingConfigurationException);
     expect(() =>
       EmailPlugin(
         { ...emailPluginConfig, senderName: undefined } as any,
-        Passauth(passauthConfig).handler,
+        Passauth(passauthConfig).handler as any,
       ),
     ).toThrow("senderName option is required");
 
@@ -127,20 +128,14 @@ describe("Email Sender Plugin - Configuration", () => {
   });
 
   it("Should init correctly if only minimun config is provided", () => {
-    const { name, handlerInit } = EmailSenderPlugin(emailPluginConfig);
+    const { name } = EmailSenderPlugin(emailPluginConfig);
 
     expect(name).toBe(EMAIL_SENDER_PLUGIN);
-    expect(
-      handlerInit({
-        passauthHandler: Passauth(passauthConfig).handler,
-        plugins: {},
-      }),
-    ).toBeInstanceOf(EmailSender);
   });
 });
 
 describe("Email Plugin:Options:Templates", () => {
-  const passauthConfig: PassauthConfiguration<UserPluginEmailSender> = {
+  const passauthConfig = {
     secretKey: "secretKey",
     repo: repoMock,
     plugins: [
@@ -157,7 +152,7 @@ describe("Email Plugin:Options:Templates", () => {
           }),
         },
       }),
-    ],
+    ] as const,
   };
 
   beforeEach(() => {
@@ -167,7 +162,7 @@ describe("Email Plugin:Options:Templates", () => {
 
   test("should render email confirm email template correctly", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     const emailSpy = jest.spyOn(emailClient, "send");
     jest
@@ -193,7 +188,7 @@ describe("Email Plugin:Options:Templates", () => {
 
   test("should render email confirm reset password template correctly", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     const emailSpy = jest.spyOn(emailClient, "send");
     await sut.sendResetPasswordEmail(userData.email);
@@ -221,7 +216,7 @@ describe("Email Plugin:Options:emailConfig override", () => {
     createUser: async (_params) => userData,
   };
 
-  const passauthConfig: PassauthConfiguration<UserPluginEmailSender> = {
+  const passauthConfig = {
     secretKey: "secretKey",
     repo: repoMock,
   };
@@ -254,7 +249,7 @@ describe("Email Plugin:Options:emailConfig override", () => {
         }),
       ],
     });
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     const emailSpy = jest.spyOn(emailClient, "send");
     await sut.register(userData);
@@ -283,9 +278,9 @@ describe("Email Plugin:Options:emailConfig override", () => {
             },
           },
         }),
-      ],
+      ] as const,
     });
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     const createConfirmEmailLinkSpy = jest.spyOn(
       emailPluginConfig.services,
@@ -319,9 +314,9 @@ describe("Email Plugin:Options:emailConfig override", () => {
             },
           },
         }),
-      ],
+      ] as const,
     });
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     const emailSpy = jest.spyOn(emailClient, "send");
     await sut.sendResetPasswordEmail(userData.email);
@@ -350,9 +345,9 @@ describe("Email Plugin:Options:emailConfig override", () => {
             },
           },
         }),
-      ],
+      ] as const,
     });
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     const createResetPasswordLinkSpy = jest.spyOn(
       emailPluginConfig.services,

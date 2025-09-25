@@ -2,7 +2,7 @@
 import { Passauth } from "passauth";
 import { hash } from "passauth/auth/utils";
 import { DEFAULT_SALTING_ROUNDS } from "passauth/auth/constants";
-import type { AuthRepo, PassauthConfiguration } from "passauth/auth/interfaces";
+import type { AuthRepo } from "passauth/auth/interfaces";
 import {
   describe,
   test,
@@ -19,14 +19,13 @@ import {
 } from "../../src/interfaces/types";
 import { PassauthEmailNotVerifiedException } from "../../src/exceptions";
 import { EmailSenderPlugin } from "../../src";
-import { EmailSender } from "../../src/handlers";
-import { EMAIL_SENDER_PLUGIN } from "../../src/constants";
 
 const userData = {
   id: 1,
   email: "user@email.com",
   password: "password123",
   emailVerified: true,
+  isBlocked: false,
 };
 
 const repoMock: AuthRepo<UserPluginEmailSender> = {
@@ -60,10 +59,10 @@ describe("Email Plugin:Login", () => {
     },
   };
 
-  const passauthConfig: PassauthConfiguration<UserPluginEmailSender> = {
+  const passauthConfig = {
     secretKey: "secretKey",
     repo: repoMock,
-    plugins: [EmailSenderPlugin(emailPluginConfig)],
+    plugins: [EmailSenderPlugin(emailPluginConfig)] as const,
   };
 
   beforeAll(() => {
@@ -77,11 +76,12 @@ describe("Email Plugin:Login", () => {
 
   test("login - User should not authenticate if email is not confirmed", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
     jest.spyOn(repoMock, "getUser").mockReturnValueOnce(
       new Promise(async (resolve) =>
         resolve({
           ...userData,
+          isBlocked: false,
           password: await hash(userData.password, DEFAULT_SALTING_ROUNDS),
           emailVerified: false,
         }),
@@ -98,7 +98,7 @@ describe("Email Plugin:Login", () => {
 
   test("login - User should authenticate if email is confirmed", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     const tokens = await sut.login({
       email: userData.email,
@@ -115,7 +115,7 @@ describe("Email Plugin:Login", () => {
 
   test("Login - Access token should inject user data when jwtUserFields is provided", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     const loginResponse = await sut.login(
       {
@@ -140,7 +140,7 @@ describe("Email Plugin:Login", () => {
 
   test("sendConfirmPasswordEmail - User should receive email with confirmation link", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     const emailSenderSpy = jest.spyOn(emailClient, "send");
 
@@ -168,7 +168,7 @@ describe("Email Plugin:Login", () => {
 
   test("sendConfirmPasswordEmail - Should return false if the email fails to send.", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     jest
       .spyOn(emailClient, "send")
@@ -183,7 +183,7 @@ describe("Email Plugin:Login", () => {
 
   test("confirmEmail - Should fail if the token is invalid", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     const { success } = await sut.confirmEmail(userData.email, "invalid-token");
 
@@ -192,7 +192,7 @@ describe("Email Plugin:Login", () => {
 
   test("confirmEmail - Should call repo.confirmEmail with correct params", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     const confirmEmailSpy = jest.spyOn(
       emailPluginConfig.services,
@@ -215,7 +215,7 @@ describe("Email Plugin:Login", () => {
 
   test("confirmEmail - Should fail if the token is used more than once", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     const confirmEmailSpy = jest.spyOn(
       emailPluginConfig.services,
@@ -237,7 +237,7 @@ describe("Email Plugin:Login", () => {
 
   test("sendResetPasswordEmail - Should pass correct params to email sender", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     jest
       .spyOn(repoMock, "getUser")
@@ -267,7 +267,7 @@ describe("Email Plugin:Login", () => {
 
   test("confirmResetPassword - Should fail if token is invalid", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     expect(
       await sut.confirmResetPassword(
@@ -290,7 +290,7 @@ describe("Email Plugin:Login", () => {
 
   test("confirmResetPassword - Should pass correct params to repo.resetPassword", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     const resetPasswordSpy = jest.spyOn(
       emailPluginConfig.services,
@@ -341,10 +341,10 @@ describe("Email Plugin:Register", () => {
     },
   };
 
-  const passauthConfig: PassauthConfiguration<UserPluginEmailSender> = {
+  const passauthConfig = {
     secretKey: "secretKey",
     repo: repoMock,
-    plugins: [EmailSenderPlugin(emailPluginConfig)],
+    plugins: [EmailSenderPlugin(emailPluginConfig)] as const,
   };
 
   const userData = {
@@ -361,7 +361,7 @@ describe("Email Plugin:Register", () => {
 
   test("register - Returns emailSent: false when the email fails to send", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     jest
       .spyOn(repoMock, "getUser")
@@ -380,7 +380,7 @@ describe("Email Plugin:Register", () => {
 
   test("register - User should receive confirmation email", async () => {
     const passauth = Passauth(passauthConfig);
-    const sut = passauth.plugins[EMAIL_SENDER_PLUGIN].handler as EmailSender;
+    const sut = passauth.handler;
 
     jest
       .spyOn(repoMock, "getUser")
