@@ -8,7 +8,7 @@ import type {
   PassauthConfiguration,
   RegisterParams,
 } from "passauth/auth/interfaces";
-import { compareHash } from "passauth/auth/utils";
+import { compareHash, hash } from "passauth/auth/utils";
 import { generateToken } from "../utils";
 import {
   DEFAULT_CONFIRMATION_LINK_EXPIRATION_MS,
@@ -57,7 +57,7 @@ export class EmailSenderHandler<
   constructor(
     passauthConfig: PassauthConfiguration<UserPluginEmailSender, []>,
     passauthRepo: AuthRepo<U>,
-    private options: EmailPluginOptions
+    private options: EmailPluginOptions,
   ) {
     super(passauthConfig, passauthRepo);
     const confirmationExpiration =
@@ -83,7 +83,7 @@ export class EmailSenderHandler<
     if (!success) {
       throw new PassauthEmailFailedToSendEmailException(
         PassauthEmailExceptionContext.REGISTER,
-        params.email
+        params.email,
       );
     }
 
@@ -106,7 +106,7 @@ export class EmailSenderHandler<
           text,
           html,
         },
-        TemplateTypes.CONFIRM_EMAIL
+        TemplateTypes.CONFIRM_EMAIL,
       );
 
       await this.options.client.send(params);
@@ -115,7 +115,7 @@ export class EmailSenderHandler<
     } catch (_error) {
       throw new PassauthEmailFailedToSendEmailException(
         PassauthEmailExceptionContext.EMAIL_CONFIRMATION,
-        email
+        email,
       );
     }
   }
@@ -147,7 +147,7 @@ export class EmailSenderHandler<
           text,
           html,
         },
-        TemplateTypes.RESET_PASSWORD
+        TemplateTypes.RESET_PASSWORD,
       );
 
       await this.options.client.send(params);
@@ -163,13 +163,16 @@ export class EmailSenderHandler<
       const isValid = this.verifyToken(
         email,
         token,
-        TemplateTypes.RESET_PASSWORD
+        TemplateTypes.RESET_PASSWORD,
       );
 
       if (isValid) {
         this.resetPasswordTokens.delete(email);
 
-        await this.options.repo.resetPassword(email, password);
+        await this.options.repo.resetPassword(
+          email,
+          await hash(password, this._aux.config.SALTING_ROUNDS),
+        );
 
         return { success: true };
       }
@@ -276,7 +279,7 @@ export class EmailSenderHandler<
 
   private getEmailParams(
     emailArgs: Pick<SendEmailArgs, "to" | "subject" | "text" | "html">,
-    templateType: TemplateTypes
+    templateType: TemplateTypes,
   ): SendEmailArgs {
     const overrideParams = this.options.emailConfig?.[templateType]?.email;
 
@@ -303,7 +306,7 @@ export class EmailSenderHandler<
 export const EmailPlugin = <U extends UserPluginEmailSender>(
   passauthConfig: PassauthConfiguration<U, []>,
   repo: AuthRepo<U>,
-  options: EmailPluginOptions
+  options: EmailPluginOptions,
 ) => {
   if (!options.senderName) {
     throw new PassauthEmailPluginMissingConfigurationException("senderName");

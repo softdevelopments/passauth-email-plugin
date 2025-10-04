@@ -1,6 +1,6 @@
 /* eslint-disable no-async-promise-executor */
 import { Passauth } from "passauth";
-import { hash } from "passauth/auth/utils";
+import { compareHash, hash } from "passauth/auth/utils";
 import { DEFAULT_SALTING_ROUNDS } from "passauth/auth/constants";
 import type { AuthRepo } from "passauth/auth/interfaces";
 import {
@@ -310,11 +310,15 @@ describe("Email Plugin:Login", () => {
       token,
       "new-password",
     );
+    const hashedPassword = repoResetPasswordSpy.mock.calls[0][1];
 
     expect(repoResetPasswordSpy).toHaveBeenCalledWith(
       userData.email,
-      "new-password",
+      expect.any(String),
     );
+
+    expect(await compareHash("new-password", hashedPassword)).toBe(true);
+
     expect(success).toBe(true);
   });
 });
