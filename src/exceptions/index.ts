@@ -13,7 +13,7 @@ export class PassauthEmailPluginException extends PassauthException {
   constructor(
     public context: string,
     public name: string,
-    message: string,
+    message: string
   ) {
     super(context, name, message);
 
@@ -26,7 +26,7 @@ export class PassauthEmailPluginMissingConfigurationException extends PassauthEm
     super(
       PassauthEmailExceptionContext.CONFIG,
       "MissingConfiguration",
-      `${key} option is required`,
+      `${key} option is required`
     );
   }
 }
@@ -36,7 +36,7 @@ export class PassauthEmailNotVerifiedException extends PassauthEmailPluginExcept
     super(
       PassauthEmailExceptionContext.LOGIN,
       "EmailNotVerified",
-      `Email not verified: ${email}`,
+      `Email not verified: ${email}`
     );
   }
 }
@@ -52,7 +52,7 @@ export class PassauthEmailInvalidConfirmEmailTokenException extends PassauthEmai
     super(
       PassauthEmailExceptionContext.EMAIL_CONFIRMATION,
       "InvalidEmailConfimationToken",
-      `Failed to send email: ${email}`,
+      `Failed to confirm email: ${email}`
     );
   }
 }
